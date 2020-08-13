@@ -7,28 +7,28 @@ import eyed3
 # TO-DO: Allow entering the directory through terminal
 rootdir = '/Users/Luis/Music/iTunes/iTunes Media/Music'
 formats = ("mp3", "wav", "flac")
-scope = 'playlist-modify-public'
+scope = 'playlist-modify-public user-library-modify user-library-read'
 """
 # TO-DO: Allow users to pick between 2 modes: direct like, or create playlist
 direct_like_scope = 'user-library-modify'
 create_playlist_scope = 'playlist-modify-public'
 """
 
-
-def connect_to_spotify():
-    """Used to connect the user to the Spotify application"""
-
+def get_username():
+    """Retrieve username from arguments"""
     if len(sys.argv) > 1:  # TO-DO Ask for username in terminal
-        username = sys.argv[1]
+       return sys.argv[1]
     else:
-        print("Usage: %s username" % (sys.argv[0],))
+        print("Usage: `python %s username`" % (sys.argv[0],))
         sys.exit()
 
+def connect_to_spotify(username):
+    """Used to obtain the access token for the given user"""
     token = util.prompt_for_user_token(username,
                                        scope,
                                        client_id='YOUR_CLIENT_ID_HERE',
                                        client_secret='YOUR_CLIENT_SECRET_HERE',
-                                       redirect_uri='http://localhost')
+                                       redirect_uri='https://localhost:8080/')
 
     if token:
         return spotipy.Spotify(auth=token)
@@ -37,6 +37,7 @@ def connect_to_spotify():
 
 
 def get_title_and_artist():
+    """Recursively reads local files in indicated rootdir"""
     print("Starting local file reading process. This may take a couple minutes\
             depending on the size of your library. Please be patient")
     successes = 0
@@ -71,12 +72,13 @@ def like_matches(song_list):
 
 
 if __name__ == "__main__":
+    username = get_username()
     try:
-        sp = connect_to_spotify()
+        sp = connect_to_spotify(username)
     except:
-        print("Can't get token for", username)
+        print(f"Can't get token for {username}")
         sys.exit()
-    # Continue with sp
+    # Continue with the Spotify object, sp
     results = sp.current_user_saved_tracks()
     for item in results['items']:
         track = item['track']
