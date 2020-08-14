@@ -1,26 +1,25 @@
+import os
 import sys
+
+import eyed3
 import spotipy
 import spotipy.util as util
-import os
-import eyed3
 
-# TO-DO: Allow entering the directory through terminal
-rootdir = '/Users/Luis/Music/iTunes/iTunes Media/Music'
-#formats = ("mp3", "wav", "flac")
-scope = 'playlist-modify-public user-library-modify user-library-read'
 """
 # TO-DO: Allow users to pick between 2 modes: direct like, or create playlist
 direct_like_scope = 'user-library-modify'
 create_playlist_scope = 'playlist-modify-public'
 """
 
+
 def get_username():
     """Retrieve username from arguments"""
     if len(sys.argv) > 1:  # TO-DO Ask for username in terminal
-       return sys.argv[1]
+        return sys.argv[1]
     else:
         print("Usage: `python %s username`" % (sys.argv[0],))
         sys.exit()
+
 
 def connect_to_spotify(username):
     """Used to obtain the access token for the given user"""
@@ -32,31 +31,35 @@ def connect_to_spotify(username):
 
     if token:
         return spotipy.Spotify(auth=token)
-
     raise()
 
 
 def get_title_and_artist():
-    """Recursively reads local files in indicated rootdir"""
-    print("Starting local file reading process. This may take a couple minutes\
-            depending on the size of your library. Please be patient")
+    """Recursively reads local files in indicated rootdir and yields a string 'song - artist'"""
+    if(len(rootdir == 0)):
+        while True:
+            rootdir = input("Please paste the path to your music directory:")
+            if os.path.isdir(rootdir):
+                break
+            else:
+                print(
+                    "The provided path is not valid. Please try again or type in the path directly\
+                    into the source code if there's issues (use Ctrl + C to exit the program)")
+
     successes = 0
     errors = 0
-    song_artist_strings = []
-    for subdir, dirs, files in os.walk(rootdir):
+    for subdir, _, files in os.walk(rootdir):
         for file in files:
-            #if file.split(".")[1] in formats:
-            if True:
+            if file.split(".")[1] in formats:
+                # if True:
                 try:
                     audiofile = eyed3.load(os.path.join(subdir, file))
                     successes += 1
-                    song_artist_strings.append(
-                        audiofile.tag.artist, "-", audiofile.tag.title)
+                    yield str(audiofile.tag.artist, "-", audiofile.tag.title)
                 except:
                     errors += 1
 
     print(f"Successfully read {successes} and found {errors} errors")
-    return song_artist_strings
 
 
 def match_songs_to_spotify(song_list):
@@ -72,15 +75,22 @@ def like_matches(song_list):
 
 
 if __name__ == "__main__":
-    #username = get_username()
-    username = "Luis De Marcos"
+    username = get_username()
+    # username = "Luis De Marcos"
     try:
         sp = connect_to_spotify(username)
     except:
         print(f"Can't get token for {username}")
         sys.exit()
     # Continue with the Spotify object, sp
-    results = sp.current_user_saved_tracks()
+    rootdir = ""  # Write the dirpath directly here to avoid having to do it through terminal e.g. '/Users/Luis/Music/iTunes/iTunes Media/Music'
+    formats = ("mp3", "wav", "flac")
+    scope = 'playlist-modify-public user-library-modify user-library-read'
+    tracks = []
+    for query in get_title_and_artist():
+        tracks.append(sp.search(query)["tracks"]['items'][-1]['uri'])
+
+    """ results = sp.current_user_saved_tracks()
     for item in results['items']:
         track = item['track']
-        print(track['name'] + ' - ' + track['artists'][0]['name'])
+        print(track['name'] + ' - ' + track['artists'][0]['name']) """
