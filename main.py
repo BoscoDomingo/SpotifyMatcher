@@ -6,7 +6,7 @@ import eyed3
 
 # TO-DO: Allow entering the directory through terminal
 rootdir = '/Users/Luis/Music/iTunes/iTunes Media/Music'
-formats = ("mp3", "wav", "flac")
+#formats = ("mp3", "wav", "flac")
 scope = 'playlist-modify-public user-library-modify user-library-read'
 """
 # TO-DO: Allow users to pick between 2 modes: direct like, or create playlist
@@ -26,8 +26,8 @@ def connect_to_spotify(username):
     """Used to obtain the access token for the given user"""
     token = util.prompt_for_user_token(username,
                                        scope,
-                                       client_id='YOUR_CLIENT_ID_HERE',
-                                       client_secret='YOUR_CLIENT_SECRET_HERE',
+                                       client_id='1b906312d4eb44189b1762bba74fa4f6',
+                                       client_secret='adb0a2eaadd64949b3ea2074a2e69b6f',
                                        redirect_uri='https://localhost:8080/')
 
     if token:
@@ -45,9 +45,9 @@ def get_title_and_artist():
     song_artist_strings = []
     for subdir, dirs, files in os.walk(rootdir):
         for file in files:
-            if file.split(".")[1] in formats:
+            #if file.split(".")[1] in formats:
+            if True:
                 try:
-                    a = 1
                     audiofile = eyed3.load(os.path.join(subdir, file))
                     successes += 1
                     song_artist_strings.append(
@@ -72,7 +72,8 @@ def like_matches(song_list):
 
 
 if __name__ == "__main__":
-    username = get_username()
+    #username = get_username()
+    username = "Luis De Marcos"
     try:
         sp = connect_to_spotify(username)
     except:
