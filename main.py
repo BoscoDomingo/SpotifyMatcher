@@ -7,12 +7,15 @@ import spotipy
 import spotipy.util as util
 
 
-def get_username():
-    """Retrieve username from arguments"""
-    if len(sys.argv) > 1:
-        return sys.argv[1]
+def get_essential_data():
+    """Retrieve username and playlist id from arguments"""
+    if len(sys.argv) == 2:
+        return sys.argv[1], ""
+    elif len(sys.argv) == 3:
+        return sys.argv[1], sys.argv[2]
     else:
-        print("Usage: `python %s username`" % (sys.argv[0],))
+        print(
+            f"Usage:\n\tpython {sys.argv[0]} username [OPTIONAL]playlist_id\n\nTo know how to find them, check the README.md")
         sys.exit()
 
 
@@ -30,12 +33,12 @@ def connect_to_spotify(username):
     sys.exit()
 
 
-def get_title_and_artist(rootdir):
-    """Recursively reads local files in indicated rootdir and yields a string 'song - artist'"""
-    if len(rootdir) == 0 or not os.path.isdir(rootdir):
+def get_title_and_artist(music_dir):
+    """Recursively reads local files in indicated music_dir and yields a string 'song - artist'"""
+    if len(music_dir) == 0 or not os.path.isdir(music_dir):
         while True:
-            rootdir = input("Please paste the path to your music directory:")
-            if os.path.isdir(rootdir):
+            music_dir = input("Please paste the path to your music directory:")
+            if os.path.isdir(music_dir):
                 break
             else:
                 print(
@@ -43,11 +46,11 @@ def get_title_and_artist(rootdir):
                     "in the path directly into the source code if there's "
                     "issues\n(use Ctrl + C to exit the program)")
     else:
-        print(f"Found valid path. Commencing search in {rootdir}")
+        print(f"Found valid path. Commencing search in {music_dir}")
 
     successes = 0
     errors = 0
-    for subdir, _, files in os.walk(rootdir):
+    for subdir, _, files in os.walk(music_dir):
         for file in files:
             if file.split(".")[-1] in formats:
                 # if True:
@@ -61,7 +64,7 @@ def get_title_and_artist(rootdir):
                     # word order instead of matching a bunch of possibilities
                     successes += 1
 
-    print(f"Successfully read {successes} files and found {errors} errors")
+    print(f"\nSuccessfully read {successes} files and found {errors} errors")
 
 
 if __name__ == "__main__":
@@ -70,7 +73,7 @@ if __name__ == "__main__":
     direct_like_scope = 'user-library-modify'
     create_playlist_scope = 'playlist-modify-public'
     """
-    rootdir = ""
+    music_dir = "D:/Users/bosco/Downloads/SpotifyMatcher Test"
     # Write the dirpath directly here to avoid having to do it through terminal
     # Make sure to escape backslashes. Examples:
     # '/Users/John/Music/My Music'
@@ -78,27 +81,44 @@ if __name__ == "__main__":
     formats = ("mp3", "wav", "flac")
     scope = 'playlist-modify-public user-library-modify user-library-read'
 
-    username = get_username()
+    username, playlist_id = get_essential_data()
     sp = connect_to_spotify(username)
 
-    track_IDs = []
-    failed_songs = []
+    track_ids = []
+    failed_song_names = []
     searched_songs = 1
-    for query in get_title_and_artist(rootdir):
+    for query in get_title_and_artist(music_dir):
         print(f"{searched_songs} - {query}")
         searched_songs += 1
         try:
-            # result = sp.search(query, limit=1)
             result = sp.search(query, limit=1)["tracks"]['items'][0]['id']
         except:
             print("\t*NO MATCH*")
-            failed_songs.append(query.replace(
-                "track:", "").replace("artist:", " - ").title())
+            failed_song_names.append(query.replace(
+                "track:", "").replace("artist:", "- ").title())
             # TO-DO: Write to .txt
         else:
-            track_IDs.append(result)
+            track_ids.append(result)
     print(
-        f"TOTAL SONGS SEARCHED: {searched_songs-1}\tTOTAL MATCHES: {len(track_IDs)}")
-    pprint(track_IDs)
-    print("Failed songs:")
-    pprint(failed_songs)
+        f"\nTOTAL SONGS SEARCHED: {searched_songs-1}\tTOTAL MATCHES: {len(track_ids)}")
+
+    try:
+        sp.user_playlist(username, playlist_id)["id"]
+    except:
+        if len(playlist_id) == 0:
+            print(f"\nNo playlist_id provided. Creating a new playlist...")
+        else:
+            print(
+                f"\nThe playlist_id provided did not match any of your existing playlists. Creating a new one...")
+
+        playlist_id = sp.user_playlist_create(
+            username, "SpotifyMatcher",
+            description="Playlist automatically created by SpotifyMatcher from my local files."
+                        "Try it at https://github.com/BoscoDomingo/SpotifyMatcher!")["id"]
+        print(f"Find it at: https://open.spotify.com/playlist/{playlist_id}")
+    finally:
+        sp.user_playlist_add_tracks(username, playlist_id, track_ids)
+        print(f"\nUNMATCHED SONGS({searched_songs-1-len(track_ids)}) (search "
+              "for these manually, as they either have wrong info or aren't "
+              "available in Spotify):")
+        pprint(failed_song_names)
