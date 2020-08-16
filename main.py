@@ -1,5 +1,6 @@
 import os
 import sys
+from datetime import date
 from pprint import pprint
 
 import eyed3
@@ -7,7 +8,7 @@ import spotipy
 import spotipy.util as util
 
 
-def get_essential_data():
+def get_user_data():
     """Retrieve username and playlist id from arguments"""
     if len(sys.argv) == 2:
         return sys.argv[1], ""
@@ -15,7 +16,8 @@ def get_essential_data():
         return sys.argv[1], sys.argv[2]
     else:
         print(
-            f"Usage:\n\tpython {sys.argv[0]} username [OPTIONAL]playlist_id\n\nTo know how to find them, check the README.md")
+            f"Usage:\n\tpython {sys.argv[0]} username [OPTIONAL]playlist_id"
+            "\n\nTo know how to find them, check the README.md")
         sys.exit()
 
 
@@ -48,77 +50,83 @@ def get_title_and_artist(music_dir):
     else:
         print(f"Found valid path. Commencing search in {music_dir}")
 
-    successes = 0
-    errors = 0
+    files_read = 0
     for subdir, _, files in os.walk(music_dir):
         for file in files:
-            if file.split(".")[-1] in formats:
-                # if True:
+            if file.split(".")[-1] == "mp3":
                 try:
                     audiofile = eyed3.load(os.path.join(subdir, file))
                 except:
-                    errors += 1
+                    pass
                 else:
-                    yield f"track:{audiofile.tag.title} artist:{audiofile.tag.artist}"
+                    files_read += 1
+                    yield (f"track:{audiofile.tag.title} artist:{audiofile.tag.artist}",
+                           f"{audiofile.tag.artist} - {audiofile.tag.title}")
                     # Query being in double quotes makes it stick to the given
                     # word order instead of matching a bunch of possibilities
-                    successes += 1
 
-    print(f"\nSuccessfully read {successes} files and found {errors} errors")
+    print(f"\nRead {files_read} files. Make sure to check for any possible "
+          "unread files due to \"Lame tag CRC check failed\" or similar.\n"
+          "Those come from an external library and this software cannot "
+          "account for them")
 
 
 if __name__ == "__main__":
     """
-    # TO-DO: Allow users to pick between 2 modes: direct like, or create playlist
+    # TO-DO: Allow users to pick between 2 modes: direct like or create playlist
     direct_like_scope = 'user-library-modify'
     create_playlist_scope = 'playlist-modify-public'
     """
-    music_dir = "D:/Users/bosco/Downloads/SpotifyMatcher Test"
-    # Write the dirpath directly here to avoid having to do it through terminal
+    scope = 'playlist-modify-public user-library-modify user-library-read'
+    music_dir = ""
+    # Write the dirpath directly here to avoid having to do it through terminal.
     # Make sure to escape backslashes. Examples:
     # '/Users/John/Music/My Music'
     # "C:\\Users\\John\\Music\\My Music"
-    formats = ("mp3", "wav", "flac")
-    scope = 'playlist-modify-public user-library-modify user-library-read'
 
-    username, playlist_id = get_essential_data()
+    username, playlist_id = get_user_data()
     sp = connect_to_spotify(username)
 
     track_ids = []
     failed_song_names = []
     searched_songs = 1
-    for query in get_title_and_artist(music_dir):
-        print(f"{searched_songs} - {query}")
-        searched_songs += 1
-        try:
-            result = sp.search(query, limit=1)["tracks"]['items'][0]['id']
-        except:
-            print("\t*NO MATCH*")
-            failed_song_names.append(query.replace(
-                "track:", "").replace("artist:", "- ").title())
-            # TO-DO: Write to .txt
-        else:
-            track_ids.append(result)
-    print(
-        f"\nTOTAL SONGS SEARCHED: {searched_songs-1}\tTOTAL MATCHES: {len(track_ids)}")
+    failed_matches_filename = "Failed matches - SpotifyMatcher.txt"
+    with open(failed_matches_filename, "w") as failed_matches_file:
+        for query_song_pair in get_title_and_artist(music_dir):
+            print(f"{searched_songs}: {query_song_pair[1]}")
+            searched_songs += 1
+            try:
+                result = sp.search(query_song_pair[0], limit=1)[
+                    "tracks"]['items'][0]['id']
+            except:
+                print("\t*NO MATCH*")
+                failed_matches_file.write(f"{query_song_pair[1]}\n")
+                failed_song_names.append(query_song_pair[1])
+            else:
+                track_ids.append(result)
+        success_rate = "{:.2f}".format(len(track_ids)/(searched_songs-1)*100)
+        print(
+            f"\n**TOTAL SONGS SEARCHED: {searched_songs-1}   TOTAL MATCHES:{len(track_ids)} ({success_rate}%)**\n")
 
     try:
-        sp.user_playlist(username, playlist_id)["id"]
+        sp.user_playlist(username, playlist_id)["id"] # Check if playlist exists
     except:
         if len(playlist_id) == 0:
             print(f"\nNo playlist_id provided. Creating a new playlist...")
         else:
             print(
-                f"\nThe playlist_id provided did not match any of your existing playlists. Creating a new one...")
-
+                f"\nThe playlist_id provided did not match any of your "
+                "existing playlists. Creating a new one...")
+        today = date.today().strftime("%d %b %Y")  # 1 Jan 2020
         playlist_id = sp.user_playlist_create(
             username, "SpotifyMatcher",
-            description="Playlist automatically created by SpotifyMatcher from my local files."
-                        "Try it at https://github.com/BoscoDomingo/SpotifyMatcher!")["id"]
+            description="Playlist automatically created by SpotifyMatcher "
+            f"from my local files on {today}. "
+            "Try it at https://github.com/BoscoDomingo/SpotifyMatcher!")["id"]
         print(f"Find it at: https://open.spotify.com/playlist/{playlist_id}")
     finally:
         sp.user_playlist_add_tracks(username, playlist_id, track_ids)
-        print(f"\nUNMATCHED SONGS({searched_songs-1-len(track_ids)}) (search "
+        print(f"\n{searched_songs-1-len(track_ids)} UNMATCHED SONGS (search "
               "for these manually, as they either have wrong info or aren't "
-              "available in Spotify):")
+              f"available in Spotify)\nWritten to \"{failed_matches_filename}\":")
         pprint(failed_song_names)
