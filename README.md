@@ -1,6 +1,6 @@
 # SpotifyMatcher
 
-Cross-platform tool to match your local files to Spotify's database! Easily move all your .mp3 files over to Spotify
+Cross-platform tool to match your local files to Spotify's database! Easily move all your .mp3 files over to a playlist on Spotify
 
 ## Before you start (5 minutes)
 
@@ -27,7 +27,7 @@ python -m venv <MyEnv>
 
 This should make the terminal look something like this:
 
-![Terminal with venv active](https://imgur.com/1jWhGhU)
+![Terminal with venv active](https://imgur.com/1jWhGhU.png)
 
 To exit the virtual environment, simply type `deactivate` and press Enter. It is not necessary, though, as we'll be working within the environment and you can just close the console once it is done.
 
@@ -46,13 +46,13 @@ Head over to [the Spotify Developer website](https://developer.spotify.com/dashb
 
 Copy the `client id` and the `client secret`, open the settings and make sure to add a URL to the "Redirect URIs". It doesn't really matter what, try https://localhost/ if not sure, but take note of it because you'll need to write it in the source code later.
 
-![](https://imgur.com/eqrvtZB)
-![](https://imgur.com/MEnU5LI)
-![](https://imgur.com/BTsjOll)
+![](https://i.imgur.com/lwFiRh9.png)
+![](https://i.imgur.com/OerZP5c.jpg)
+![](https://i.imgur.com/Z3DIPZf.jpg)
 
 With these 3, open the file `main.py` with whatever IDE or Text Editor you like (preferably Wordpad if you use a text editor), and change this bit of code:
 
-![connect_to_spotify code](https://imgur.com/jx3shE3)
+![connect_to_spotify code](https://i.imgur.com/m4rNPEW.png)
 
 (Use the Find function to find it if you don't see it. It is inside the `connect_to_spotify` function)
 
@@ -70,11 +70,16 @@ With this, the application should open a new tab on your default browser. Accept
 
 After that, authentication should be done and you can move on to the good stuff. Simply paste the path to your music directory (Tip: right click the address bar on Windows Explorer, 'Copy address as text'). **You can also bypass this step** if you manually enter a path in the source code. Simply find the `music_dir` variable and paste it there before you execute the program:
 
-![](https://imgur.com/zXi9UkD)
+![Imgur](https://i.imgur.com/zXi9UkD.png)
 
 If the path is valid, the program should start identifying your files and subsequently searching Spotify for a match. This may take several minutes, depending on your processor, internet speed, number of files... Just be patient!
 
-Once done, if you specified a `playlist_id` it will try to add the matches to said playlist. ***CAREFUL***, if you don't own said playlist, or can't add tracks, **the program will fail, and you'll have to start again**, so make sure you have said permissions. We recommend either creating a new playlist and getting its id (simply open it in the browser and copy the final string of numbers and letters) or leaving it blank, so the program creates a new one for you.
+Once done, if you specified a `playlist_id` it will try to add the matches to said playlist.
+#### ***CAREFUL***
+If you don't own said playlist, can't add tracks or it has been deleted, **the program will fail, and you'll have to start again**, so make sure you have said permissions.
+
+
+We recommend either creating a new playlist and getting its id (simply open it in the browser and copy the final string of numbers and letters) or leaving it blank, so the program creates a new one for you.
 
 Only thing left is to check the .txt file with the failed matches and search those manually (blame Spotify's unconsistent artist - title debacle!)
 
@@ -82,7 +87,7 @@ Only thing left is to check the .txt file with the failed matches and search tho
 ### Username
 Open Spotify on PC, go to your user profile and click the 3 dots. Click share and "Copy Spotify URI". You can use that directly, or remove the `spotify:user:`. Doesn't matter
 
-![](https://imgur.com/TS6ZZlV)
+![](https://imgur.com/TS6ZZlV.png)
 
 You can also copy your user link and just take the stuff after `/user` but before the `?`
 
