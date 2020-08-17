@@ -4,7 +4,7 @@ from datetime import date
 from pprint import pprint
 from time import sleep
 
-import eyed3
+from tinytag import TinyTag
 import spotipy
 import spotipy.util as util
 
@@ -28,7 +28,7 @@ def connect_to_spotify(username):
                                        scope,
                                        client_id='1b906312d4eb44189b1762bba74fa4f6',
                                        client_secret='adb0a2eaadd64949b3ea2074a2e69b6f',
-                                       redirect_uri='https://localhost:8080/')
+                                       redirect_uri='https://open.spotify.com/')
 
     if token:
         return spotipy.Spotify(auth=token)
@@ -56,13 +56,13 @@ def get_title_and_artist(music_dir):
         for file in files:
             if file.split(".")[-1] == "mp3":
                 try:
-                    audiofile = eyed3.load(os.path.join(subdir, file))
+                    audiofile = TinyTag.get(os.path.join(subdir, file))
                 except:
                     pass
                 else:
                     files_read += 1
-                    yield (f"track:{audiofile.tag.title} artist:{audiofile.tag.artist}",
-                           f"{audiofile.tag.artist} - {audiofile.tag.title}")
+                    yield (f"track:{audiofile.title} artist:{audiofile.artist}",
+                           f"{audiofile.artist} - {audiofile.title}")
                     # NOTE: Query being in double quotes makes it stick to the
                     # given word order instead of matching a bunch of possibilities
                     # Use it (by writing \" at the beginning and end of the string)
@@ -118,7 +118,9 @@ if __name__ == "__main__":
     # '/Users/John/Music/My Music'
     # "C:\\Users\\John\\Music\\My Music"
 
-    username, playlist_id = get_user_data()
+    # username, playlist_id = get_user_data()
+    username = ""
+    playlist_id = ""
     sp = connect_to_spotify(username)
     track_ids = []
     failed_song_names = []
