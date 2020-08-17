@@ -85,13 +85,13 @@ Only thing left is to check the .txt file with the failed matches and search tho
 
 ## Getting your username and playlist ids
 ### Username
-Open Spotify on PC, go to your user profile and click the 3 dots. Click share and "Copy Spotify URI". You can use that directly, or remove the `spotify:user:`. Doesn't matter
+Open Spotify on PC, go to your user profile and click the 3 dots. Click share and "Copy Spotify URI". Paste and remove the `spotify:user:`
 
 ![](https://imgur.com/TS6ZZlV.png)
 
-You can also copy your user link and just take the stuff after `/user` but before the `?`
+You can also copy your profile link and just take the stuff after `/user` but before the `?`
 
 ### Playlist id
-We recommend you don't actually use a playlist id and rather leave it blank so the program creates one for you automatically, but if you insist, simply open the playlist, click the 3 dots > Share > Copy Spotify URI. As with the username, you can (and frankly we suggest you do) remove the `spotify:playlist:`.
+We recommend you don't actually use a playlist id and rather leave it blank so the program creates one for you automatically, but if you insist, simply open the playlist, click the 3 dots > Share > Copy Spotify URI. As with the username, remove the `spotify:playlist:`.
 
-As with the username, you can simply copy the palylist link and just take the final string of numbers and letters. Same thing.
+Alternatively, you can simply copy the playlist link and just take the final string of numbers and letters. Same thing.
