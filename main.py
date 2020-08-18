@@ -54,15 +54,13 @@ def get_title_and_artist(music_dir):
     files_read = 0
     for subdir, _, files in os.walk(music_dir):
         for file in files:
-            if file.split(".")[-1] == "mp3":
-                try:
-                    audiofile = TinyTag.get(os.path.join(subdir, file))
-                except:
-                    pass
-                else:
-                    files_read += 1
-                    yield (f"track:{audiofile.title} artist:{audiofile.artist}",
-                           f"{audiofile.artist} - {audiofile.title}")
+            try:
+                audiofile = TinyTag.get(os.path.join(subdir, file))
+            except:
+                pass
+            else:
+                files_read += 1
+                yield (f"track:{audiofile.title} artist:{audiofile.artist}",f"{audiofile.artist} - {audiofile.title}")
                     # NOTE: Query being in double quotes makes it stick to the
                     # given word order instead of matching a bunch of possibilities
                     # Use it (by writing \" at the beginning and end of the string)
