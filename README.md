@@ -6,9 +6,9 @@ Cross-platform tool to match your local files to Spotify's database! Easily move
 
 This isn't infalible, and it would be quite surprising if it matched 100% of songs. Be aware you'll probably have to do *a bit* of manual searching, but this will significantly reduce that amount by automating the majority of the process. On to the requirements and instructions:
 
-### Install Python >3.4
+### Install Python >3.6
 
-Make sure you have Python 3.4 or later installed, preferably the latest version. We tested it with Python 3.8.4 on a x64 PC with Windows 10
+Make sure you have Python 3.6 or later installed, preferably the latest version. We tested it with Python 3.8.4 on a x64 PC with Windows 10
 You'll need to install the libraries `spotipy` and `eyed3`
 
 I suggest you create a virtual environment so you don't mess other libraries, with the built in `venv`
