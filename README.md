@@ -66,9 +66,9 @@ python ./main.py username playlist_id
 ```
 (may have to use `python3` if you have several versions of Python installed or if you're not on Windows).
 
-With this, the application should open a new tab on your default browser. Accept the permissions its asking, and copy the URL of the page it takes you to (if it's localhost, it will probably not load anything, that's perfectly ok). Paste it in the terminal.
+With this, the application should open a new tab on your default browser. Accept the permissions it asks for, and copy the URL of the page it takes you to (if it's localhost, it will probably not load anything, that's perfectly ok. We only need the URL). Paste it in the terminal.
 
-After that, authentication should be done and you can move on to the good stuff. Simply paste the path to your music directory (Tip: right click the address bar on Windows Explorer, 'Copy address as text'). **You can also bypass this step** if you manually enter a path in the source code. Simply find the `music_dir` variable and paste it there before you execute the program:
+With that, authentication should be done and you can move on to the *good stuff*. Simply paste the path to your music directory (Tip: right click the address bar on Windows Explorer, 'Copy address as text'). **You can also bypass this step** if you manually enter a path in the source code. Simply find the `music_dir` variable and paste it there before you execute the program:
 
 ![Imgur](https://i.imgur.com/zXi9UkD.png)
 
@@ -81,7 +81,7 @@ If you don't own said playlist, can't add tracks or it has been deleted, **the p
 
 We recommend either creating a new playlist and getting its id (simply open it in the browser and copy the final string of numbers and letters) or leaving it blank, so the program creates a new one for you.
 
-Only thing left is to check the .txt file with the failed matches and search those manually (blame Spotify's unconsistent artist - title debacle!)
+Only thing left is to check the .txt file with the failed matches and search those manually (I know, I know... blame Spotify's unconsistent artist - title debacle!)
 
 ## Getting your username and playlist ids
 ### Username
