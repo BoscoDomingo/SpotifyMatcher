@@ -52,7 +52,7 @@ Copy the `client id` and the `client secret`, open the settings and make sure to
 
 With these 3, open the file `main.py` with whatever IDE or Text Editor you like (preferably Wordpad if you use a text editor), and change this bit of code:
 
-![connect_to_spotify code](https://i.imgur.com/m4rNPEW.png)
+![connect_to_spotify code](https://imgur.com/ltblD1T.png)
 
 (Use the Find function to find it if you don't see it. It is inside the `connect_to_spotify` function)
 
@@ -70,7 +70,7 @@ With this, the application should open a new tab on your default browser. Accept
 
 With that, authentication should be done and you can move on to the *good stuff*. Simply paste the path to your music directory (Tip: right click the address bar on Windows Explorer, 'Copy address as text'). **You can also bypass this step** if you manually enter a path in the source code. Simply find the `music_dir` variable and paste it there before you execute the program:
 
-![Imgur](https://i.imgur.com/zXi9UkD.png)
+![Imgur](https://imgur.com/mZGFs6d.png)
 
 If the path is valid, the program should start identifying your files and subsequently searching Spotify for a match. This may take several minutes, depending on your processor, internet speed, number of files... Just be patient!
 
