@@ -1,12 +1,11 @@
 import os
 import sys
-from datetime import date
-from pprint import pprint
-from time import sleep
-
-from tinytag import TinyTag
+import time
 import spotipy
-import spotipy.util as util
+from spotipy import oauth2
+from datetime import datetime
+from time import sleep
+from tinytag import TinyTag
 
 
 def get_user_data():
@@ -18,20 +17,22 @@ def get_user_data():
     else:
         print(
             f"Usage:\n\tpython {sys.argv[0]} username [OPTIONAL]playlist_id"
-            "\n\nTo know how to find them, check the README.md")
+            "\n\nTo know how to find each, check the README.md or the GitHub page")
         sys.exit()
 
 
-def connect_to_spotify(username):
-    """Used to obtain the access token for the given user"""
-    token = util.prompt_for_user_token(username,
-                                       scope,
-                                       client_id='1b906312d4eb44189b1762bba74fa4f6',
-                                       client_secret='adb0a2eaadd64949b3ea2074a2e69b6f',
-                                       redirect_uri='https://open.spotify.com/')
-
-    if token:
-        return spotipy.Spotify(auth=token)
+def connect_to_spotify():
+    """Used to obtain the auth_manager and establish a connection to Spotify
+    for the given user.
+    Returns (Spotify object, auth_manager)"""
+    auth_manager = oauth2.SpotifyOAuth(
+        client_id='1b906312d4eb44189b1762bba74fa4f6',
+        client_secret='adb0a2eaadd64949b3ea2074a2e69b6f',
+        redirect_uri='https://open.spotify.com/',
+        scope=scope,
+        username=username)
+    if auth_manager:
+        return (spotipy.Spotify(auth_manager=auth_manager), auth_manager)
     print(f"Can't get token for {username}")
     sys.exit()
 
@@ -60,12 +61,15 @@ def get_title_and_artist(music_dir):
                 pass
             else:
                 files_read += 1
-                yield (f"track:{audiofile.title} artist:{audiofile.artist}",f"{audiofile.artist} - {audiofile.title}")
-                    # NOTE: Query being in double quotes makes it stick to the
-                    # given word order instead of matching a bunch of possibilities
-                    # Use it (by writing \" at the beginning and end of the string)
-                    # if you are not happy with the matches found
-
+                yield (f"track:{audiofile.title} artist:{audiofile.artist}", f"{audiofile.artist} - {audiofile.title}")
+                # NOTE: Query being in double quotes makes it stick to the
+                # given word order instead of matching a bunch of possibilities
+                # Use it (by writing \" at the beginning and end of the string)
+                # if you are not happy with the matches found
+    if files_read == 0:
+        print("\nNo files found at the specified location."
+              "Please check the path to the directory is correct.")
+        sys.exit()
     print(f"\nRead {files_read} files. Make sure to check for any possible "
           "unread files due to \"Lame tag CRC check failed\" or similar.\n"
           "Those come from an external library and this software cannot "
@@ -74,11 +78,11 @@ def get_title_and_artist(music_dir):
 
 def create_new_playlist():
     try:
-        today = date.today().strftime("%d %b %Y")  # 1 Jan 2020
+        date = datetime.now().strftime("%d %b %Y at %H:%M")  # 1 Jan 2020 at 13:30
         playlist_id = sp.user_playlist_create(
             username, "SpotifyMatcher",
             description="Playlist automatically created by SpotifyMatcher "
-            f"from my local files on {today}. "
+            f"from my local files on {date}. "
             "Try it at https://github.com/BoscoDomingo/SpotifyMatcher!")["id"]
         print(
             f"Find it at: https://open.spotify.com/playlist/{playlist_id}")
@@ -105,7 +109,7 @@ def add_tracks_to_playlist(track_ids):
 
 if __name__ == "__main__":
     """
-    # TO-DO: Allow users to pick between 2 modes: direct like or create playlist
+    TO-DO: Allow users to pick between 2 modes: direct like or create playlist
     direct_like_scope = 'user-library-modify'
     create_playlist_scope = 'playlist-modify-public'
     """
@@ -116,16 +120,18 @@ if __name__ == "__main__":
     # '/Users/John/Music/My Music'
     # "C:\\Users\\John\\Music\\My Music"
 
-    # username, playlist_id = get_user_data()
-    username = ""
-    playlist_id = ""
-    sp = connect_to_spotify(username)
+    username, playlist_id = get_user_data()
+    sp, auth_manager = connect_to_spotify()
+    token_info = auth_manager.get_cached_token()
     track_ids = []
     failed_song_names = []
     searched_songs = 0
     failed_matches_filename = "Failed matches - SpotifyMatcher.txt"
+
     with open(failed_matches_filename, "w") as failed_matches_file:
         for query_song_pair in get_title_and_artist(music_dir):
+            if auth_manager.is_token_expired(token_info):
+                token_info = auth_manager.refresh_access_token(token_info["refresh_token"])
             searched_songs += 1
             print(f"{searched_songs}: {query_song_pair[1]}")
             try:
@@ -139,23 +145,21 @@ if __name__ == "__main__":
                 track_ids.append(result)
         success_rate = "{:.2f}".format(len(track_ids)/(searched_songs-1)*100)
         print(
-            f"\n**TOTAL SONGS SEARCHED: {searched_songs}"
-            f"   TOTAL MATCHES:{len(track_ids)} ({success_rate}%)**\n")
+            f"\n***TOTAL SONGS SEARCHED: {searched_songs}"
+            f"  TOTAL MATCHES:{len(track_ids)} ({success_rate}%)***\n")
 
     try:  # Check if playlist exists
+        if not playlist_id:
+            raise Exception
         sp.user_playlist(username, playlist_id)["id"]
     except:
-        if len(playlist_id) == 0:
-            print(f"\nNo playlist_id provided. Creating a new playlist...")
-        else:
-            print(
-                f"\nThe playlist_id provided did not match any of your "
-                "existing playlists. Creating a new one...")
+        print(f"\nNo playlist_id provided. Creating a new playlist..." if len(playlist_id) == 0 else f"\nThe playlist_id provided did not match any of your "
+              "existing playlists. Creating a new one...")
         playlist_id = create_new_playlist()
     finally:
         number_of_matches = len(track_ids)
         add_tracks_to_playlist(track_ids)
-        print(f"Successfully added {number_of_matches} songs to the playlist.\n"
+        print(f"\nSuccessfully added {number_of_matches} songs to the playlist.\n"
               "Thank you for using SpotifyMatcher!")
         print(f"\n{searched_songs-number_of_matches} UNMATCHED SONGS (search "
               "for these manually, as they either have wrong info or aren't "
