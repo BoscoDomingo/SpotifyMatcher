@@ -76,6 +76,18 @@ def get_title_and_artist(music_dir):
           "account for them")
 
 
+def ensure_playlist_exists(playlist_id):
+    try:
+        if not playlist_id:
+            raise Exception
+        sp.user_playlist(username, playlist_id)["id"]
+        return playlist_id
+    except:
+        print(f"\nNo playlist_id provided. Creating a new playlist..." if len(playlist_id) == 0 else f"\nThe playlist_id provided did not match any of your "
+              "existing playlists. Creating a new one...")
+        return create_new_playlist()
+
+
 def create_new_playlist():
     try:
         date = datetime.now().strftime("%d %b %Y at %H:%M")  # 1 Jan 2020 at 13:30
@@ -90,7 +102,7 @@ def create_new_playlist():
     except:
         print("\nWARNING: \n"
               "There was an error creating the playlist. Please, create one "
-              "manually and paste its id in the terminal, next to your username\n")
+              "manually and paste its id in the terminal, after your username\n")
         sys.exit()
 
 
@@ -122,7 +134,11 @@ if __name__ == "__main__":
 
     username, playlist_id = get_user_data()
     sp, auth_manager = connect_to_spotify()
-    token_info = auth_manager.get_cached_token()
+
+    # Needed to get the cached authentication if missing
+    dummy_search = sp.search("whatever", limit=1)
+
+    token_info = auth_manager.get_cached_token() if auth_manager.get_cached_token() else auth_manager.get_access_token(as_dict=True)
     track_ids = []
     failed_song_names = []
     searched_songs = 0
@@ -148,19 +164,11 @@ if __name__ == "__main__":
             f"\n***TOTAL SONGS SEARCHED: {searched_songs}"
             f"  TOTAL MATCHES:{len(track_ids)} ({success_rate}%)***\n")
 
-    try:  # Check if playlist exists
-        if not playlist_id:
-            raise Exception
-        sp.user_playlist(username, playlist_id)["id"]
-    except:
-        print(f"\nNo playlist_id provided. Creating a new playlist..." if len(playlist_id) == 0 else f"\nThe playlist_id provided did not match any of your "
-              "existing playlists. Creating a new one...")
-        playlist_id = create_new_playlist()
-    finally:
-        number_of_matches = len(track_ids)
-        add_tracks_to_playlist(track_ids)
-        print(f"\nSuccessfully added {number_of_matches} songs to the playlist.\n"
-              "Thank you for using SpotifyMatcher!")
-        print(f"\n{searched_songs-number_of_matches} UNMATCHED SONGS (search "
-              "for these manually, as they either have wrong info or aren't "
-              f"available in Spotify)\nWritten to \"{failed_matches_filename}\":\n")
+    playlist_id = ensure_playlist_exists(playlist_id)
+    number_of_matches = len(track_ids)
+    add_tracks_to_playlist(track_ids)
+    print(f"\nSuccessfully added {number_of_matches} songs to the playlist.\n"
+          "Thank you for using SpotifyMatcher!")
+    print(f"\n{searched_songs-number_of_matches} UNMATCHED SONGS (search "
+          "for these manually, as they either have wrong info or aren't "
+          f"available in Spotify)\nWritten to \"{failed_matches_filename}\":\n")
