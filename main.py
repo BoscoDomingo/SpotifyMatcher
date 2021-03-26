@@ -26,8 +26,8 @@ def connect_to_spotify():
     for the given user.
     Returns (Spotify object, auth_manager)"""
     auth_manager = oauth2.SpotifyOAuth(
-        client_id='cb5d641661864c4aacd34d207ebeaf3b',
-        client_secret='836ab7f3dc4f4a37bcf9aebd57b03091',
+        client_id='YOUR_CLIENT_ID_HERE',
+        client_secret='YOUR_CLIENT_SECRET_HERE',
         redirect_uri='http://localhost/',
         scope=scope,
         username=username)
