@@ -4,7 +4,9 @@ Cross-platform tool to match your local files to Spotify's database. Easily tran
 
 ## Before you start (5 minutes)
 
-This isn't infalible, and it would be quite surprising if it matched 100% of songs. Be aware you'll probably have to do *a bit* of manual searching, but this will significantly reduce that amount by automating the majority of the process. On to the requirements and instructions:
+*This isn't infalible, and it would be quite surprising if it matched 100% of songs. Be aware you'll probably have to do **a bit** of manual searching, but this will significantly reduce that amount by automating the majority of the process.*
+
+On to the requirements and instructions:
 
 ### Install Python >3.6
 
