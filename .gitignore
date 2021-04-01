@@ -129,5 +129,4 @@ dmypy.json
 .pyre/
 
 .cache-*
-
-Failed matches - SpotifyMatcher.txt
+*.txt

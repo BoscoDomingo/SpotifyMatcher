@@ -7,18 +7,15 @@ from datetime import datetime
 from time import sleep
 from tinytag import TinyTag
 
-
 def get_user_data():
     """Retrieve username and playlist id from arguments"""
     if len(sys.argv) == 2:
         return sys.argv[1], ""
-    elif len(sys.argv) == 3:
+    if len(sys.argv) == 3:
         return sys.argv[1], sys.argv[2]
-    else:
-        print(
-            f"Usage:\n\tpython {sys.argv[0]} username [OPTIONAL]playlist_id"
-            "\n\nTo know how to find each, check the README.md or the GitHub page")
-        sys.exit()
+    print(f"Usage:\n\tpython {sys.argv[0]} username [OPTIONAL]playlist_id"
+        "\n\nTo know how to find each, check the README.md or the GitHub page")
+    sys.exit()
 
 
 def connect_to_spotify():
@@ -28,7 +25,7 @@ def connect_to_spotify():
     auth_manager = oauth2.SpotifyOAuth(
         client_id='YOUR_CLIENT_ID_HERE',
         client_secret='YOUR_CLIENT_SECRET_HERE',
-        redirect_uri='http://localhost/',
+        redirect_uri='https://localhost/',
         scope=scope,
         username=username)
     if auth_manager:
@@ -77,6 +74,7 @@ def get_title_and_artist(music_dir):
 
 
 def ensure_playlist_exists(playlist_id):
+    """Checks whether the playlist exists and if not, creates a new one"""
     try:
         if not playlist_id:
             raise Exception
@@ -122,9 +120,9 @@ def add_tracks_to_playlist(track_ids, playlist_id):
 
 def updateWithTrackChunk(chunk_track_ids, playlist_id):
     playlist_id = ensure_playlist_exists(playlist_id)
-    number_of_matches = len(chunk_track_ids)
     add_tracks_to_playlist(chunk_track_ids, playlist_id)
     return playlist_id
+
 
 if __name__ == "__main__":
     """
@@ -174,46 +172,46 @@ if __name__ == "__main__":
         with open(successful_matches_filename, append_write) as successful_matches_file:
             found_songs = successful_matches_file.readlines()
             failed_songs = failed_matches_file.readlines()
-            print(f"Stored found songs: {len(found_songs)}. Stored failed songs: {len(failed_songs)}");
+            print(f"Stored found songs: {len(found_songs)}. Stored failed songs: {len(failed_songs)}")
             for query_song_pair in get_title_and_artist(music_dir):
                 try:
                     if auth_manager.is_token_expired(token_info):
                         token_info = auth_manager.refresh_access_token(token_info["refresh_token"])
                     searched_songs += 1
-                    song_name = f"{query_song_pair[1]}\n".encode('utf8');
+                    song_name = f"{query_song_pair[1]}\n".encode('utf8')
                     print(f"{searched_songs}: {query_song_pair[1]}")
                     if(song_name in found_songs or song_name in failed_songs):
                         print(f"\t ^ already found or failed, skipping")
-                    else:
-                        try:
-                            result = sp.search(query_song_pair[0], limit=1)[
-                                "tracks"]['items'][0]['id']
-                        except:
-                            if (len(query_song_pair) > 1):
-                                print("\t*NO MATCH*")
-                                failed_matches_file.write(song_name)
-                                failed_song_names.append(query_song_pair[1])
-                            else:
-                                print("SONG CORRUPTED")
+                        continue
+                    try:
+                        result = sp.search(query_song_pair[0], limit=1)[
+                            "tracks"]['items'][0]['id']
+                    except:
+                        if (len(query_song_pair) > 1):
+                            print("\t*NO MATCH*")
+                            failed_matches_file.write(song_name)
+                            failed_song_names.append(query_song_pair[1])
                         else:
-                            track_ids.append(result)
-                            chunk_track_ids.append(result)
-                            successful_matches_file.write(song_name)
-                            if(searched_songs % 100 == 0 and len(chunk_track_ids) > 0):
-                                print("\tSending Chunk")
-                                playlist_id = updateWithTrackChunk(chunk_track_ids, playlist_id)
-                                chunk_track_ids = []
-                except Exception as e: print(e)
-                    
-                    
+                            print("SONG CORRUPTED")
+                    else:
+                        track_ids.append(result)
+                        chunk_track_ids.append(result)
+                        successful_matches_file.write(song_name)
+                        if(searched_songs % 100 == 0 and len(chunk_track_ids) > 0):
+                            print("\tSending chunk...")
+                            playlist_id = updateWithTrackChunk(chunk_track_ids, playlist_id)
+                            chunk_track_ids = []
+                except Exception as e:
+                    print(e)
+
         success_rate = "{:.2f}".format(len(track_ids)/(searched_songs-1)*100)
         print(
             f"\n***TOTAL SONGS SEARCHED: {searched_songs}"
             f"  TOTAL MATCHES:{len(track_ids)} ({success_rate}%)***\n")
 
     playlist_id = updateWithTrackChunk(chunk_track_ids, playlist_id)
-    print(f"\nSuccessfully added {number_of_matches} songs to the playlist.\n"
+    print(f"\nSuccessfully added {len(chunk_track_ids)} songs to the playlist.\n"
           "Thank you for using SpotifyMatcher!")
-    print(f"\n{searched_songs-number_of_matches} UNMATCHED SONGS (search "
+    print(f"\n{searched_songs-len(chunk_track_ids)} UNMATCHED SONGS (search "
           "for these manually, as they either have wrong info or aren't "
           f"available in Spotify)\nWritten to \"{failed_matches_filename}\":\n")
