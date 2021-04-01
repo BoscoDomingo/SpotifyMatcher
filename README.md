@@ -1,6 +1,6 @@
 # SpotifyMatcher
 
-Cross-platform tool to match your local files to Spotify's database! Easily move all your .mp3 files over to a playlist on Spotify
+Cross-platform tool to match your local files to Spotify's database. Easily transfer all your local files over to a playlist on Spotify in just a few minutes. Migrating your local library has never been this easy!
 
 ## Before you start (5 minutes)
 
