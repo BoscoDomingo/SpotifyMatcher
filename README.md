@@ -52,7 +52,7 @@ Copy the `client id` and the `client secret`, open the settings and make sure to
 ![](https://i.imgur.com/OerZP5c.jpg)
 ![](https://i.imgur.com/Z3DIPZf.jpg)
 
-With these 3, open the file `main.py` with whatever IDE or Text Editor you like (preferably Wordpad if you use a text editor), and change this bit of code:
+With these 3, open the file `main.py` with whatever IDE or Text Editor you like (preferably Notepad++, Wordpad or TextEdit if you use a text editor), and change this bit of code:
 
 ![connect_to_spotify code](https://imgur.com/ltblD1T.png)
 
@@ -62,8 +62,8 @@ Paste the aforementioned ids and the URL you chose in the corresponding lines. W
 
 ## Using SpotifyMatcher
 
-Usage is very, very simple. You only have to call the program with 
-```python
+Usage is very, very simple. You only have to call the program from a Terminal of your choice with 
+```
 python ./main.py username playlist_id
 ```
 (may have to use `python3` if you have several versions of Python installed or if you're not on Windows).
@@ -81,9 +81,9 @@ Once done, if you specified a `playlist_id` it will try to add the matches to sa
 If you don't own said playlist, can't add tracks or it has been deleted, **the program will fail, and you'll have to start again**, so make sure you have said permissions.
 
 
-We recommend either creating a new playlist and getting its id (simply open it in the browser and copy the final string of numbers and letters) or leaving it blank, so the program creates a new one for you.
+We recommend either leaving it blank, so the program creates a new one for you or creating a new playlist and getting its id (simply open it in the browser and copy the final string of numbers and letters).
 
-Only thing left is to check the .txt file with the failed matches and search those manually (I know, I know... blame Spotify's unconsistent artist - title debacle!)
+Only thing left is to check the .txt file with the failed matches and search those manually (I know, I know... blame Spotify's inconsistent artist - title debacle!)
 
 ## Getting your username and playlist ids
 ### Username
