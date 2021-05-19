@@ -26,9 +26,9 @@ def connect_to_spotify():
     for the given user.
     Returns (Spotify object, auth_manager)"""
     auth_manager = oauth2.SpotifyOAuth(
-        client_id='1b906312d4eb44189b1762bba74fa4f6',
-        client_secret='adb0a2eaadd64949b3ea2074a2e69b6f',
-        redirect_uri='https://open.spotify.com/',
+        client_id='YOUR_CLIENT_ID_HERE',
+        client_secret='YOUR_CLIENT_SECRET_HERE',
+        redirect_uri='http://localhost/',
         scope=scope,
         username=username)
     if auth_manager:
@@ -106,11 +106,12 @@ def create_new_playlist():
         sys.exit()
 
 
-def add_tracks_to_playlist(track_ids):
+def add_tracks_to_playlist(track_ids, playlist_id):
     """Add tracks in batches of 100, since that's the limit Spotify has in place"""
     spotify_limit = 100
     while len(track_ids) > 0:
         try:
+            print("\tAdding to Playlist " + playlist_id)
             sp.user_playlist_add_tracks(
                 username, playlist_id, track_ids[:spotify_limit])
         except:  # API rate limit reached
@@ -118,6 +119,12 @@ def add_tracks_to_playlist(track_ids):
         else:
             del track_ids[:spotify_limit]
 
+
+def updateWithTrackChunk(chunk_track_ids, playlist_id):
+    playlist_id = ensure_playlist_exists(playlist_id)
+    number_of_matches = len(chunk_track_ids)
+    add_tracks_to_playlist(chunk_track_ids, playlist_id)
+    return playlist_id
 
 if __name__ == "__main__":
     """
@@ -140,33 +147,71 @@ if __name__ == "__main__":
 
     token_info = auth_manager.get_cached_token() if auth_manager.get_cached_token() else auth_manager.get_access_token(as_dict=True)
     track_ids = []
+    chunk_track_ids = []
     failed_song_names = []
     searched_songs = 0
     failed_matches_filename = "Failed matches - SpotifyMatcher.txt"
+    successful_matches_filename = "Successful matches - SpotifyMatcher.txt"
+    cached_playlist_id_filename = "playlist_id.txt"
 
-    with open(failed_matches_filename, "w") as failed_matches_file:
-        for query_song_pair in get_title_and_artist(music_dir):
-            if auth_manager.is_token_expired(token_info):
-                token_info = auth_manager.refresh_access_token(token_info["refresh_token"])
-            searched_songs += 1
-            print(f"{searched_songs}: {query_song_pair[1]}")
-            try:
-                result = sp.search(query_song_pair[0], limit=1)[
-                    "tracks"]['items'][0]['id']
-            except:
-                print("\t*NO MATCH*")
-                failed_matches_file.write(f"{query_song_pair[1]}\n")
-                failed_song_names.append(query_song_pair[1])
-            else:
-                track_ids.append(result)
+    if os.path.exists(cached_playlist_id_filename):
+        playlist_file = open(cached_playlist_id_filename)
+        playlist_id = playlist_file.read()
+    else:
+        playlist_id = ensure_playlist_exists(playlist_id)
+        playlist_file = open(cached_playlist_id_filename, "w+")
+        playlist_file.write(playlist_id)
+        playlist_file.close()
+
+    if os.path.exists(successful_matches_filename):
+        append_write = 'rb+' # append if already exists
+    else:
+        append_write = 'wb+'
+
+    playlist_id = ensure_playlist_exists(playlist_id)
+
+    with open(failed_matches_filename, append_write) as failed_matches_file:
+        with open(successful_matches_filename, append_write) as successful_matches_file:
+            found_songs = successful_matches_file.readlines()
+            failed_songs = failed_matches_file.readlines()
+            print(f"Stored found songs: {len(found_songs)}. Stored failed songs: {len(failed_songs)}");
+            for query_song_pair in get_title_and_artist(music_dir):
+                try:
+                    if auth_manager.is_token_expired(token_info):
+                        token_info = auth_manager.refresh_access_token(token_info["refresh_token"])
+                    searched_songs += 1
+                    song_name = f"{query_song_pair[1]}\n".encode('utf8');
+                    print(f"{searched_songs}: {query_song_pair[1]}")
+                    if(song_name in found_songs or song_name in failed_songs):
+                        print(f"\t ^ already found or failed, skipping")
+                    else:
+                        try:
+                            result = sp.search(query_song_pair[0], limit=1)[
+                                "tracks"]['items'][0]['id']
+                        except:
+                            if (len(query_song_pair) > 1):
+                                print("\t*NO MATCH*")
+                                failed_matches_file.write(song_name)
+                                failed_song_names.append(query_song_pair[1])
+                            else:
+                                print("SONG CORRUPTED")
+                        else:
+                            track_ids.append(result)
+                            chunk_track_ids.append(result)
+                            successful_matches_file.write(song_name)
+                            if(searched_songs % 100 == 0 and len(chunk_track_ids) > 0):
+                                print("\tSending Chunk")
+                                playlist_id = updateWithTrackChunk(chunk_track_ids, playlist_id)
+                                chunk_track_ids = []
+                except Exception as e: print(e)
+                    
+                    
         success_rate = "{:.2f}".format(len(track_ids)/(searched_songs-1)*100)
         print(
             f"\n***TOTAL SONGS SEARCHED: {searched_songs}"
             f"  TOTAL MATCHES:{len(track_ids)} ({success_rate}%)***\n")
 
-    playlist_id = ensure_playlist_exists(playlist_id)
-    number_of_matches = len(track_ids)
-    add_tracks_to_playlist(track_ids)
+    playlist_id = updateWithTrackChunk(chunk_track_ids, playlist_id)
     print(f"\nSuccessfully added {number_of_matches} songs to the playlist.\n"
           "Thank you for using SpotifyMatcher!")
     print(f"\n{searched_songs-number_of_matches} UNMATCHED SONGS (search "
