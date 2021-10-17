@@ -31,10 +31,21 @@ def connect_to_spotify():
         redirect_uri='https://open.spotify.com/',
         scope=scope,
         username=username)
+
     if auth_manager:
         return (spotipy.Spotify(auth_manager=auth_manager), auth_manager)
+
     print(f"Can't get token for {username}")
     sys.exit()
+
+
+def get_auth_token():
+    auth_token = auth_manager.get_cached_token()
+
+    if auth_token:
+        return auth_token
+
+    return auth_manager.get_access_token(as_dict=True)
 
 
 def get_title_and_artist(music_dir):
@@ -42,13 +53,13 @@ def get_title_and_artist(music_dir):
     if len(music_dir) == 0 or not os.path.isdir(music_dir):
         while True:
             music_dir = input("Please paste the path to your music directory:")
+
             if os.path.isdir(music_dir):
                 break
-            else:
-                print(
-                    "The provided path is not valid. Please try again or type "
-                    "in the path directly into the source code if there's "
-                    "issues\n(use Ctrl + C to exit the program)")
+
+            print("The provided path is not valid. Please try again or type "
+                  "in the path directly into the source code if there's "
+                  "issues\n(use Ctrl + C to exit the program)")
     else:
         print(f"Found valid path. Commencing search in {music_dir}")
 
@@ -58,18 +69,20 @@ def get_title_and_artist(music_dir):
             try:
                 audiofile = TinyTag.get(os.path.join(subdir, file))
             except:
-                pass
-            else:
-                files_read += 1
-                yield (f"track:{audiofile.title} artist:{audiofile.artist}", f"{audiofile.artist} - {audiofile.title}")
-                # NOTE: Query being in double quotes makes it stick to the
-                # given word order instead of matching a bunch of possibilities
-                # Use it (by writing \" at the beginning and end of the string)
-                # if you are not happy with the matches found
+                continue
+
+            files_read += 1
+            yield (f"track:{audiofile.title} artist:{audiofile.artist}", f"{audiofile.artist} - {audiofile.title}")
+            # NOTE: Query being in double quotes makes it stick to the
+            # given word order instead of matching a bunch of possibilities
+            # Use it (by writing \" at the beginning and end of the string)
+            # if you are not happy with the matches found
+
     if files_read == 0:
         print("\nNo files found at the specified location."
               "Please check the path to the directory is correct.")
         sys.exit()
+
     print(f"\nRead {files_read} files. Make sure to check for any possible "
           "unread files due to \"Lame tag CRC check failed\" or similar.\n"
           "Those come from an external library and this software cannot "
@@ -92,12 +105,12 @@ def create_new_playlist():
     try:
         date = datetime.now().strftime("%d %b %Y at %H:%M")  # 1 Jan 2020 at 13:30
         playlist_id = sp.user_playlist_create(
-            username, "SpotifyMatcher",
+            username,
+            "SpotifyMatcher",
             description="Playlist automatically created by SpotifyMatcher "
             f"from my local files on {date}. "
             "Try it at https://github.com/BoscoDomingo/SpotifyMatcher!")["id"]
-        print(
-            f"Find it at: https://open.spotify.com/playlist/{playlist_id}")
+        print(f"Find it at: https://open.spotify.com/playlist/{playlist_id}")
         return playlist_id
     except:
         print("\nWARNING: \n"
@@ -111,8 +124,7 @@ def add_tracks_to_playlist(track_ids):
     spotify_limit = 100
     while len(track_ids) > 0:
         try:
-            sp.user_playlist_add_tracks(
-                username, playlist_id, track_ids[:spotify_limit])
+            sp.user_playlist_add_tracks(username, playlist_id, track_ids[:spotify_limit])
         except:  # API rate limit reached
             sleep(0.2)
         else:
@@ -120,16 +132,11 @@ def add_tracks_to_playlist(track_ids):
 
 
 if __name__ == "__main__":
-    """
-    TO-DO: Allow users to pick between 2 modes: direct like or create playlist
-    direct_like_scope = 'user-library-modify'
-    create_playlist_scope = 'playlist-modify-public'
-    """
     scope = 'playlist-modify-public user-library-modify'
     music_dir = ""
     # Write the dirpath directly here to avoid having to do it through terminal.
     # Make sure to escape backslashes. Examples:
-    # '/Users/John/Music/My Music'
+    # 'C:/Users/John/Music/My Music'
     # "C:\\Users\\John\\Music\\My Music"
 
     username, playlist_id = get_user_data()
@@ -138,7 +145,7 @@ if __name__ == "__main__":
     # Needed to get the cached authentication if missing
     dummy_search = sp.search("whatever", limit=1)
 
-    token_info = auth_manager.get_cached_token() if auth_manager.get_cached_token() else auth_manager.get_access_token(as_dict=True)
+    token_info = get_auth_token()
     track_ids = []
     failed_song_names = []
     searched_songs = 0
@@ -148,17 +155,19 @@ if __name__ == "__main__":
         for query_song_pair in get_title_and_artist(music_dir):
             if auth_manager.is_token_expired(token_info):
                 token_info = auth_manager.refresh_access_token(token_info["refresh_token"])
+
             searched_songs += 1
             print(f"{searched_songs}: {query_song_pair[1]}")
+
             try:
-                result = sp.search(query_song_pair[0], limit=1)[
-                    "tracks"]['items'][0]['id']
+                result = sp.search(query_song_pair[0], limit=1)["tracks"]['items'][0]['id']
             except:
                 print("\t*NO MATCH*")
                 failed_matches_file.write(f"{query_song_pair[1]}\n")
                 failed_song_names.append(query_song_pair[1])
             else:
                 track_ids.append(result)
+
         success_rate = "{:.2f}".format(len(track_ids)/(searched_songs-1)*100)
         print(
             f"\n***TOTAL SONGS SEARCHED: {searched_songs}"
@@ -167,6 +176,7 @@ if __name__ == "__main__":
     playlist_id = ensure_playlist_exists(playlist_id)
     number_of_matches = len(track_ids)
     add_tracks_to_playlist(track_ids)
+
     print(f"\nSuccessfully added {number_of_matches} songs to the playlist.\n"
           "Thank you for using SpotifyMatcher!")
     print(f"\n{searched_songs-number_of_matches} UNMATCHED SONGS (search "

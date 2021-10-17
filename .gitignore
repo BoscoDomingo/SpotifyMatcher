@@ -131,3 +131,4 @@ dmypy.json
 .cache-*
 
 Failed matches - SpotifyMatcher.txt
+.vscode/
