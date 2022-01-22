@@ -26,9 +26,9 @@ def connect_to_spotify():
     for the given user.
     Returns (Spotify object, auth_manager)"""
     auth_manager = oauth2.SpotifyOAuth(
-        client_id='1b906312d4eb44189b1762bba74fa4f6',
-        client_secret='adb0a2eaadd64949b3ea2074a2e69b6f',
-        redirect_uri='https://open.spotify.com/',
+        client_id="1b906312d4eb44189b1762bba74fa4f6",
+        client_secret="adb0a2eaadd64949b3ea2074a2e69b6f",
+        redirect_uri="https://open.spotify.com/",
         scope=scope,
         username=username)
 
@@ -57,9 +57,11 @@ def get_title_and_artist(music_dir):
             if os.path.isdir(music_dir):
                 break
 
-            print("The provided path is not valid. Please try again or type "
-                  "in the path directly into the source code if there's "
-                  "issues\n(use Ctrl + C to exit the program)")
+            print(
+                "The provided path is not valid. Please try again or type "
+                "in the path directly into the source code if there's "
+                "issues\n(use Ctrl + C to exit the program)"
+            )
     else:
         print(f"Found valid path. Commencing search in {music_dir}")
 
@@ -79,14 +81,18 @@ def get_title_and_artist(music_dir):
             # if you are not happy with the matches found
 
     if files_read == 0:
-        print("\nNo files found at the specified location."
-              "Please check the path to the directory is correct.")
+        print(
+            "\nNo files found at the specified location."
+            "Please check the path to the directory is correct."
+        )
         sys.exit()
 
-    print(f"\nRead {files_read} files. Make sure to check for any possible "
-          "unread files due to \"Lame tag CRC check failed\" or similar.\n"
-          "Those come from an external library and this software cannot "
-          "account for them")
+    print(
+        f"\nRead {files_read} files. Make sure to check for any possible "
+        'unread files due to "Lame tag CRC check failed" or similar.\n'
+        "Those come from an external library and this software cannot "
+        "account for them"
+    )
 
 
 def ensure_playlist_exists(playlist_id):
@@ -96,8 +102,12 @@ def ensure_playlist_exists(playlist_id):
         sp.user_playlist(username, playlist_id)["id"]
         return playlist_id
     except:
-        print(f"\nNo playlist_id provided. Creating a new playlist..." if len(playlist_id) == 0 else f"\nThe playlist_id provided did not match any of your "
-              "existing playlists. Creating a new one...")
+        print(
+            f"\nNo playlist_id provided. Creating a new playlist..."
+            if len(playlist_id) == 0
+            else f"\nThe playlist_id provided did not match any of your "
+            "existing playlists. Creating a new one..."
+        )
         return create_new_playlist()
 
 
@@ -132,7 +142,7 @@ def add_tracks_to_playlist(track_ids):
 
 
 if __name__ == "__main__":
-    scope = 'playlist-modify-public user-library-modify'
+    scope = "playlist-modify-public user-library-modify"
     music_dir = ""
     # Write the dirpath directly here to avoid having to do it through terminal.
     # Make sure to escape backslashes. Examples:
@@ -168,7 +178,7 @@ if __name__ == "__main__":
             else:
                 track_ids.append(result)
 
-        success_rate = "{:.2f}".format(len(track_ids)/(searched_songs-1)*100)
+        success_rate = "{:.2f}".format(len(track_ids) / (searched_songs - 1) * 100)
         print(
             f"\n***TOTAL SONGS SEARCHED: {searched_songs}"
             f"  TOTAL MATCHES:{len(track_ids)} ({success_rate}%)***\n")
@@ -177,8 +187,12 @@ if __name__ == "__main__":
     number_of_matches = len(track_ids)
     add_tracks_to_playlist(track_ids)
 
-    print(f"\nSuccessfully added {number_of_matches} songs to the playlist.\n"
-          "Thank you for using SpotifyMatcher!")
-    print(f"\n{searched_songs-number_of_matches} UNMATCHED SONGS (search "
-          "for these manually, as they either have wrong info or aren't "
-          f"available in Spotify)\nWritten to \"{failed_matches_filename}\":\n")
+    print(
+        f"\nSuccessfully added {number_of_matches} songs to the playlist.\n"
+        "Thank you for using SpotifyMatcher!"
+    )
+    print(
+        f"\n{searched_songs-number_of_matches} UNMATCHED SONGS (search "
+        "for these manually, as they either have wrong info or aren't "
+        f'available in Spotify)\nWritten to "{failed_matches_filename}":\n'
+    )

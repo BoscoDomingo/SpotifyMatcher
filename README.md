@@ -35,11 +35,16 @@ To exit the virtual environment, simply type `deactivate` and press Enter. It is
 
 ### Installing the libraries
 
-You can now install `spotipy` and `eyed3` with:
+You can now install `spotipy`, `tinytag` and `eyed3` with:
 
 ```python
+pip install -r .\requirements.txt
+```
+or
+```python
 pip install --upgrade spotipy
-pip install --upgrade eyed3
+pip install -U eyed3
+pip install -U tinytag
 ```
 
 ### Creating a Spotify Developer Application
@@ -62,7 +67,7 @@ Paste the aforementioned ids and the URL you chose in the corresponding lines. W
 
 ## Using SpotifyMatcher
 
-Usage is very, very simple. You only have to call the program from a Terminal of your choice with 
+Usage is very, very simple. You only have to call the program from a Terminal of your choice with
 ```
 python ./main.py username playlist_id
 ```

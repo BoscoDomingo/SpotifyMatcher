@@ -1,0 +1,3 @@
+eyed3~=0.9.6
+spotipy~=2.19.0
+tinytag~=1.7.0
