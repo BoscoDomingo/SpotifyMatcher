@@ -161,7 +161,7 @@ if __name__ == "__main__":
     searched_songs = 0
     failed_matches_filename = "Failed matches - SpotifyMatcher.txt"
 
-    with open(failed_matches_filename, "w") as failed_matches_file:
+    with open(failed_matches_filename, "w", encoding="utf-8") as failed_matches_file:
         for query_song_pair in get_title_and_artist(music_dir):
             if auth_manager.is_token_expired(token_info):
                 token_info = auth_manager.refresh_access_token(token_info["refresh_token"])
