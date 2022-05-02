@@ -1,5 +1,7 @@
 # SpotifyMatcher
 
+![Logo image](https://user-images.githubusercontent.com/46006784/166269127-56d4709d-6464-4f83-aace-e6fb53bbbd9d.png)
+
 Cross-platform tool to match your local files to Spotify's database. Easily transfer all your local songs over to a playlist on Spotify in just a few minutes. Migrating your local library has never been easier!
 
 ## Before you start (5 minutes)
