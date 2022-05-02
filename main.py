@@ -1,10 +1,10 @@
 import os
 import sys
-import time
-import spotipy
-from spotipy import oauth2
 from datetime import datetime
 from time import sleep
+
+import spotipy
+from spotipy import oauth2
 from tinytag import TinyTag
 
 
