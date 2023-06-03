@@ -12,13 +12,14 @@ def get_user_data():
     """Retrieve username and playlist id from arguments"""
     if len(sys.argv) == 2:
         return sys.argv[1], ""
-    elif len(sys.argv) == 3:
+
+    if len(sys.argv) == 3:
         return sys.argv[1], sys.argv[2]
-    else:
-        print(
-            f"Usage:\n\tpython {sys.argv[0]} username [OPTIONAL]playlist_id"
-            "\n\nTo know how to find each, check the README.md or the GitHub page")
-        sys.exit()
+
+    print(
+        f"Usage:\n\tpython {sys.argv[0]} username [OPTIONAL]playlist_id"
+        "\n\nTo know how to find each, check the README.md or the GitHub page")
+    sys.exit()
 
 
 def connect_to_spotify():
@@ -29,7 +30,7 @@ def connect_to_spotify():
         client_id="1b906312d4eb44189b1762bba74fa4f6",
         client_secret="adb0a2eaadd64949b3ea2074a2e69b6f",
         redirect_uri="https://open.spotify.com/",
-        scope=scope,
+        scope=SCOPE,
         username=username)
 
     if auth_manager:
@@ -142,8 +143,8 @@ def add_tracks_to_playlist(track_ids):
 
 
 if __name__ == "__main__":
-    scope = "playlist-modify-public user-library-modify"
-    music_dir = ""
+    SCOPE = "playlist-modify-public user-library-modify"
+    MUSIC_DIR = ""
     # Write the dirpath directly here to avoid having to do it through terminal.
     # Make sure to escape backslashes. Examples:
     # 'C:/Users/John/Music/My Music'
@@ -159,10 +160,10 @@ if __name__ == "__main__":
     track_ids = []
     failed_song_names = []
     searched_songs = 0
-    failed_matches_filename = "Failed matches - SpotifyMatcher.txt"
+    FAILED_MATCHES_FILENAME = "Failed matches - SpotifyMatcher.txt"
 
-    with open(failed_matches_filename, "w", encoding="utf-8") as failed_matches_file:
-        for query_song_pair in get_title_and_artist(music_dir):
+    with open(FAILED_MATCHES_FILENAME, "w", encoding="utf-8") as failed_matches_file:
+        for query_song_pair in get_title_and_artist(MUSIC_DIR):
             if auth_manager.is_token_expired(token_info):
                 token_info = auth_manager.refresh_access_token(token_info["refresh_token"])
 
@@ -194,5 +195,5 @@ if __name__ == "__main__":
     print(
         f"\n{searched_songs-number_of_matches} UNMATCHED SONGS (search "
         "for these manually, as they either have wrong info or aren't "
-        f'available in Spotify)\nWritten to "{failed_matches_filename}":\n'
+        f'available in Spotify)\nWritten to "{FAILED_MATCHES_FILENAME}":\n'
     )
