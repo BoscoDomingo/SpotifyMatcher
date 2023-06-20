@@ -10,9 +10,9 @@ _This isn't infalible, and it would be quite surprising if it matched 100% of so
 
 On to the requirements and instructions:
 
-### Install Python >3.6
+### Install Python >3.7
 
-Make sure you have Python 3.6+ installed, preferably the latest version (I tested it with Python 3.8.4 on an x64 PC with Windows 10).
+Make sure you have Python 3.7+ installed, preferably the latest version (I tested it with Python 3.8.4 on an x64 PC with Windows 10).
 
 You'll need to install the libraries `spotipy`, `tinytag` and `eyed3`
 

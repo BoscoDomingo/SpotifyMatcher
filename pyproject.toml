@@ -1,13 +1,13 @@
 [tool.poetry]
 name = "spotifymatcher"
-version = "0.1.0"
+version = "1.4.0"
 description = ""
 authors = ["Bosco Domingo <boscodomingob@gmail.com>"]
 license = "GNU"
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.6"
+python = "^3.7"
 spotipy = "^2.23.0"
 eyed3="^0.9.6"
 tinytag="^1.7.0"
