@@ -143,7 +143,7 @@ def add_tracks_to_playlist(track_ids):
 
 
 if __name__ == "__main__":
-    SCOPE = "playlist-modify-public user-library-modify"
+    SCOPE = "playlist-modify-public playlist-modify-private user-library-modify"
     MUSIC_DIR = ""
     # Write the dirpath directly here to avoid having to do it through terminal.
     # Make sure to escape backslashes. Examples:
