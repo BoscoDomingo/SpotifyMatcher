@@ -1,18 +1,18 @@
 [tool.poetry]
-name = "spotifymatcher"
-version = "1.4.0"
-description = ""
 authors = ["Bosco Domingo <boscodomingob@gmail.com>"]
+description = ""
 license = "GNU"
+name = "SpotifyMatcher"
 readme = "README.md"
+version = "2.0.0"
+packages = [{include = "main.py"}]
 
 [tool.poetry.dependencies]
-python = "^3.7"
+python = "^3.10"
+eyed3 = "^0.9.6"
 spotipy = "^2.23.0"
-eyed3="^0.9.6"
-tinytag="^1.7.0"
-
+tinytag = "^1.7.0"
 
 [build-system]
-requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+requires = ["poetry-core"]
