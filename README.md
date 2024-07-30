@@ -1,8 +1,21 @@
-# SpotifyMatcher
+# SpotifyMatcher <!-- omit in toc -->
 
 ![Logo image](https://user-images.githubusercontent.com/46006784/166269127-56d4709d-6464-4f83-aace-e6fb53bbbd9d.png)
 
 Cross-platform tool to match your local files to Spotify's database. Easily transfer all your local songs over to a playlist on Spotify in just a few minutes. Migrating your local library has never been easier!
+
+1. [Before you start (5 minutes)](#before-you-start-5-minutes)
+	1. [Install Python \>=3.10](#install-python-310)
+	2. [Using poetry (OPTIONAL, RECOMMENDED)](#using-poetry-optional-recommended)
+	3. [Using venv (OPTIONAL)](#using-venv-optional)
+		1. [Installing the libraries](#installing-the-libraries)
+	4. [Creating a Spotify Developer Application](#creating-a-spotify-developer-application)
+2. [Using SpotifyMatcher](#using-spotifymatcher)
+		1. [**_CAREFUL_**](#careful)
+3. [Getting your username and playlist ids](#getting-your-username-and-playlist-ids)
+	1. [Username](#username)
+	2. [Playlist id](#playlist-id)
+
 
 ## Before you start (5 minutes)
 
@@ -18,13 +31,13 @@ You'll need to install the libraries `spotipy`, `tinytag` and `eyed3`
 
 I suggest you create a virtual environment so you don't mess other libraries, with the built-in `venv` or via `poetry`.
 
-### Using poetry (OPTIONAL, RECOMMENDED)
+### Using [poetry](https://python-poetry.org/docs/) (OPTIONAL, RECOMMENDED)
 
 Simply run `poetry install` and it'll create a venv with the correct requirements inside. If you don't have poetry, I suggest you install it globally using `pip install poetry`.
 
 ### Using venv (OPTIONAL)
 
-For this, simply navigate to or open a Terminal in the folder that the code is in (type `wt` in the Windows Explorer address bar for Windows Terminal, or `cmd` if that doesn't work) and write the following commands (make sure to change `<MyEnv>` for your desired folder name):
+For this, simply navigate to or open a terminal in the folder that the code is in (type `wt` in the Windows Explorer address bar for Windows Terminal, or `cmd` if that doesn't work) and write the following commands (make sure to change `<MyEnv>` for your desired folder name):
 
 ```shell
 python -m pip install --upgrade pip
