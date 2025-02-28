@@ -10,7 +10,7 @@ packages = [{include = "main.py"}]
 [tool.poetry.dependencies]
 python = "^3.10"
 eyed3 = "^0.9.6"
-spotipy = "^2.23.0"
+spotipy = "^2.25.1"
 tinytag = "^1.7.0"
 
 [build-system]
