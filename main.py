@@ -18,7 +18,8 @@ def get_user_data():
 
     print(
         f"Usage:\n\tpython {sys.argv[0]} username [OPTIONAL]playlist_id"
-        "\n\nTo know how to find each, check the README.md or the GitHub page")
+        "\n\nTo know how to find each, check the README.md or the GitHub page"
+    )
     sys.exit()
 
 
@@ -31,22 +32,23 @@ def connect_to_spotify():
         client_secret="adb0a2eaadd64949b3ea2074a2e69b6f",
         redirect_uri="https://open.spotify.com/",
         scope=SCOPE,
-        username=username)
+        username=username,
+    )
 
-    if auth_manager:
-        return (spotipy.Spotify(auth_manager=auth_manager), auth_manager)
+    if not auth_manager:
+        print(f"Can't get token for {username}")
+        sys.exit()
 
-    print(f"Can't get token for {username}")
-    sys.exit()
+    return (spotipy.Spotify(auth_manager=auth_manager), auth_manager)
 
 
 def get_auth_token():
     auth_token = auth_manager.get_cached_token()
 
-    if auth_token:
-        return auth_token
+    if not auth_token:
+        return auth_manager.get_access_token(as_dict=True)
 
-    return auth_manager.get_access_token(as_dict=True)
+    return auth_token
 
 
 def get_title_and_artist(music_dir):
@@ -55,14 +57,15 @@ def get_title_and_artist(music_dir):
         while True:
             music_dir = input("Please paste the path to your music directory:")
 
-            if os.path.isdir(music_dir):
-                break
+            if not os.path.isdir(music_dir):
+                print(
+                    "The provided path is not valid. Please try again or type "
+                    "in the path directly into the source code if there's "
+                    "issues\n(use Ctrl + C to exit the program)"
+                )
 
-            print(
-                "The provided path is not valid. Please try again or type "
-                "in the path directly into the source code if there's "
-                "issues\n(use Ctrl + C to exit the program)"
-            )
+            break
+
     else:
         print(f"Found valid path. Commencing search in {music_dir}")
 
@@ -82,10 +85,7 @@ def get_title_and_artist(music_dir):
             # if you are not happy with the matches found
 
     if files_read == 0:
-        print(
-            "\nNo files found at the specified location."
-            "Please check the path to the directory is correct."
-        )
+        print("\nNo files found at the specified location." "Please check the path to the directory is correct.")
         sys.exit()
 
     print(
@@ -100,14 +100,14 @@ def ensure_playlist_exists(playlist_id):
     try:
         if not playlist_id:
             raise Exception
+
         sp.user_playlist(username, playlist_id)["id"]
         return playlist_id
     except:
         print(
             f"\nNo playlist_id provided. Creating a new playlist..."
             if len(playlist_id) == 0
-            else f"\nThe playlist_id provided did not match any of your "
-            "existing playlists. Creating a new one..."
+            else f"\nThe playlist_id provided did not match any of your " "existing playlists. Creating a new one..."
         )
         return create_new_playlist()
 
@@ -120,14 +120,17 @@ def create_new_playlist():
             "SpotifyMatcher",
             description="Playlist automatically created by SpotifyMatcher "
             f"from my local files on {date}. "
-            "Try it at https://github.com/BoscoDomingo/SpotifyMatcher!")["id"]
+            "Try it at https://github.com/BoscoDomingo/SpotifyMatcher!",
+        )["id"]
         print(f"Find it at: https://open.spotify.com/playlist/{playlist_id}")
         return playlist_id
     except:
-        print("\nWARNING: \n"
-              "There was an error creating the playlist. Please, create one "
-              "manually and paste its id in the terminal, after your username\n")
-        sys.exit()
+        print(
+            "\nWARNING: \n"
+            "There was an error creating the playlist. Please, create one "
+            "manually and paste its id in the terminal, after your username\n"
+        )
+        sys.exit(1)
 
 
 def add_tracks_to_playlist(track_ids):
@@ -171,7 +174,7 @@ if __name__ == "__main__":
             print(f"{searched_songs}: {query_song_pair[1]}")
 
             try:
-                result = sp.search(query_song_pair[0], limit=1)["tracks"]['items'][0]['id']
+                result = sp.search(query_song_pair[0], limit=1)["tracks"]["items"][0]["id"]
             except:
                 print("\t*NO MATCH*")
                 failed_matches_file.write(f"{query_song_pair[1]}\n")
@@ -180,18 +183,13 @@ if __name__ == "__main__":
                 track_ids.append(result)
 
         success_rate = "{:.2f}".format(len(track_ids) / (searched_songs - 1) * 100)
-        print(
-            f"\n***TOTAL SONGS SEARCHED: {searched_songs}"
-            f"  TOTAL MATCHES:{len(track_ids)} ({success_rate}%)***\n")
+        print(f"\n***TOTAL SONGS SEARCHED: {searched_songs}" f"  TOTAL MATCHES:{len(track_ids)} ({success_rate}%)***\n")
 
     playlist_id = ensure_playlist_exists(playlist_id)
     number_of_matches = len(track_ids)
     add_tracks_to_playlist(track_ids)
 
-    print(
-        f"\nSuccessfully added {number_of_matches} songs to the playlist.\n"
-        "Thank you for using SpotifyMatcher!"
-    )
+    print(f"\nSuccessfully added {number_of_matches} songs to the playlist.\n" "Thank you for using SpotifyMatcher!")
     print(
         f"\n{searched_songs-number_of_matches} UNMATCHED SONGS (search "
         "for these manually, as they either have wrong info or aren't "

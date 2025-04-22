@@ -6,10 +6,9 @@ Cross-platform tool to match your local files to Spotify's database. Easily tran
 
 1. [Before you start (5 minutes)](#before-you-start-5-minutes)
 	1. [Install Python \>=3.10](#install-python-310)
-	2. [Using poetry (OPTIONAL, RECOMMENDED)](#using-poetry-optional-recommended)
-	3. [Using venv (OPTIONAL)](#using-venv-optional)
+	2. [Using `venv` or `virtualenv` (OPTIONAL, RECOMMENDED)](#using-venv-or-virtualenv-optional-recommended)
 		1. [Installing the libraries](#installing-the-libraries)
-	4. [Creating a Spotify Developer Application](#creating-a-spotify-developer-application)
+	3. [Creating a Spotify Developer Application](#creating-a-spotify-developer-application)
 2. [Using SpotifyMatcher](#using-spotifymatcher)
 		1. [**_CAREFUL_**](#careful)
 3. [Getting your username and playlist ids](#getting-your-username-and-playlist-ids)
@@ -27,28 +26,27 @@ On to the requirements and instructions:
 
 Make sure you have Python 3.10+ installed, preferably the latest version (I tested it with Python 3.12.4 on an x64 PC with Windows 11).
 
-You'll need to install the libraries `spotipy`, `tinytag` and `eyed3`
+You'll need to install the libraries `spotipy`, `tinytag` and `eyed3`.
 
-I suggest you create a virtual environment so you don't mess other libraries, with the built-in `venv` or via `poetry`.
+I suggest you create a virtual environment so you don't install them globally, with the built-in `venv` or via `virtualenv`.
 
-### Using [poetry](https://python-poetry.org/docs/) (OPTIONAL, RECOMMENDED)
+### Using `venv` or `virtualenv` (OPTIONAL, RECOMMENDED)
 
-Simply run `poetry install` and it'll create a venv with the correct requirements inside. If you don't have poetry, I suggest you install it globally using `pip install poetry`.
-
-### Using venv (OPTIONAL)
-
-For this, simply navigate to or open a terminal in the folder that the code is in (type `wt` in the Windows Explorer address bar for Windows Terminal, or `cmd` if that doesn't work) and write the following commands (make sure to change `<MyEnv>` for your desired folder name):
+For this, simply navigate to or open a terminal in the folder that the code is in (type `wt` in the Windows Explorer address bar for Windows Terminal, or `cmd` if that doesn't work) and write the following commands (make sure to change `.venv` for your desired folder name):
 
 ```shell
-python -m pip install --upgrade pip
-python -m venv <MyEnv>
-<MyEnv>\Scripts\activate.bat # <- on cmd
-<MyEnv>\Scripts\Activate.ps1 # <- on PowerShell
+python -m pip install -U pip # get the latest pip just in case
+pip install virtualenv
+# python -m venv .venv # If you prefer the built-in venv
+python -m virtualenv .venv
+.venv\Scripts\activate.bat # cmd
+.venv\Scripts\Activate.ps1 # PowerShell
+source .venv/bin/activate # Linux/MacOS
 ```
 
 This should make the terminal look something like this:
 
-![Terminal with venv active](https://imgur.com/1jWhGhU.png)
+![Terminal with venv active](https://i.imgur.com/1jWhGhU.png)
 
 To exit the virtual environment, simply type `deactivate` and press Enter. It is not necessary, though, as you'll be working within the environment and you can just close the console once it is done.
 
@@ -57,15 +55,13 @@ To exit the virtual environment, simply type `deactivate` and press Enter. It is
 You can now install `spotipy`, `tinytag` and `eyed3` inside the venv with:
 
 ```shell
-pip install -r .\requirements.txt
+pip install -r requirements.txt
 ```
 
 or
 
 ```shell
-pip install --upgrade spotipy
-pip install -U eyed3
-pip install -U tinytag
+pip install -U spotipy tinytag eyed3
 ```
 
 ### Creating a Spotify Developer Application
@@ -80,7 +76,7 @@ Copy the `client id` and the `client secret`, open the settings and make sure to
 
 With these 3, open the file `main.py` with whatever IDE or Text Editor you like (preferably Notepad++, Wordpad or TextEdit if you use a text editor), and change this bit of code:
 
-![connect_to_spotify code](https://imgur.com/ltblD1T.png)
+![connect_to_spotify code](https://i.imgur.com/ltblD1T.png)
 
 (Use the Find function to find it if you don't see it. It is inside the `connect_to_spotify` function)
 
@@ -88,19 +84,23 @@ Paste the aforementioned ids and the URL you chose in the corresponding lines. W
 
 ## Using SpotifyMatcher
 
-Usage is very, very simple. You only have to call the program from a Terminal of your choice with
+Usage is very, very simple. You only have to call the program from a terminal of your choice with
 
+```sh
+python main.py username playlist_id
 ```
-python ./main.py username playlist_id
-```
 
-(may have to use `python3` if you have several versions of Python installed or if you're not on Windows).
+(may have to use `python3` if you have several versions of Python installed or if you're on Linux distros).
 
-With this, the application should open a new tab on your default browser. Accept the permissions it asks for, and copy the URL of the page it takes you to (if it's localhost, it will probably not load anything, that's perfectly ok. We only need the URL). Paste it in the terminal.
+With this, the application should open a new tab on your default browser. Accept the permissions it asks for, and copy the URL of the page it takes you to (if it's localhost, it will probably not load anything, that's perfectly ok; we only need the URL).
 
-With that, authentication should be done and you can move on to the _good stuff_. Simply paste the path to your music directory (Tip: right click the address bar on Windows Explorer, 'Copy address as text'). **You can also bypass this step** if you manually enter a path in the source code. Simply find the `music_dir` variable and paste it there before you execute the program:
+Paste it in the terminal.
 
-![Imgur](https://imgur.com/mZGFs6d.png)
+With that, authentication should be done and you can move on to the _good stuff_. Simply paste the path to your music directory (Tip: right click the address bar on Windows Explorer, 'Copy address as text').
+
+> **You can also bypass this step** if you manually enter a path in the source code. Simply find the `music_dir` variable and paste it there before you execute the program:
+>
+>![Imgur](https://i.imgur.com/mZGFs6d.png)
 
 If the path is valid, the program should start identifying your files and subsequently searching Spotify for a match. This may take several minutes, depending on your processor, internet speed, number of files... Just be patient!
 
@@ -120,7 +120,7 @@ Only thing left is to check the .txt file with the failed matches and search tho
 
 Open Spotify on PC, go to your user profile and click the 3 dots. Click share and "Copy Spotify URI". Paste and remove the `spotify:user:`
 
-![](https://imgur.com/TS6ZZlV.png)
+![Find your Spotify URI](https://i.imgur.com/TS6ZZlV.png)
 
 You can also copy your profile link and just take the stuff after `/user` but before the `?`
 
