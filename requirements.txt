@@ -1,3 +1,3 @@
-spotipy~=2.23.0
-eyed3~=0.9.6
-tinytag~=1.7.0
+spotipy~=2.25.1
+eyed3~=0.9.7
+tinytag~=2.1.0

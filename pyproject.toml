@@ -1,18 +1,16 @@
-[tool.poetry]
-authors = ["Bosco Domingo <boscodomingob@gmail.com>"]
-description = ""
-license = "GNU"
+[project]
 name = "SpotifyMatcher"
+version = "2.1.0"
+description = "A simple tool to add your local music to a Spotify playlist"
+authors = [{name="Bosco Domingo", email="boscodomingob@gmail.com"}]
+license = {text = "GNU GPLv3"}
 readme = "README.md"
-version = "2.0.0"
-packages = [{include = "main.py"}]
+requires-python = ">=3.10,<4.0"
+dependencies = [
+    "spotipy>=2.25.1",
+    "tinytag>=1.7.0",
+    "eyed3>=0.9.6"
+]
 
-[tool.poetry.dependencies]
-python = "^3.10"
-eyed3 = "^0.9.6"
-spotipy = "^2.25.1"
-tinytag = "^1.7.0"
-
-[build-system]
-build-backend = "poetry.core.masonry.api"
-requires = ["poetry-core"]
+[tool.black]
+line-length = 120
