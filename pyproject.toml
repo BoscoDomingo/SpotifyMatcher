@@ -8,8 +8,7 @@ readme = "README.md"
 requires-python = ">=3.10,<4.0"
 dependencies = [
     "spotipy>=2.25.1",
-    "tinytag>=1.7.0",
-    "eyed3>=0.9.6"
+    "tinytag>=2.1.0"
 ]
 
 [tool.black]

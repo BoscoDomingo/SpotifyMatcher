@@ -1,3 +1,2 @@
 spotipy~=2.25.1
-eyed3~=0.9.7
 tinytag~=2.1.0
