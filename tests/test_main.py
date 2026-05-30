@@ -71,12 +71,18 @@ class TestMain(unittest.TestCase):
             with open(failed_matches_filename, encoding="utf-8") as failed_matches_file:
                 self.assertEqual(failed_matches_file.read(), "")
 
-    def test_run_skips_spotify_searches_for_incomplete_tags(self):
+    def test_run_skips_spotify_searches_only_when_title_is_missing(self):
         sp = Mock()
-        sp.search.side_effect = [
-            {"tracks": {"items": [{"id": "warmup"}]}},
-            {"tracks": {"items": [{"id": "track123"}]}},
-        ]
+
+        def search(query, limit):
+            matches = {
+                "whatever": "warmup",
+                "track:Song": "title-only-track",
+                "track:Song artist:Artist": "complete-track",
+            }
+            return {"tracks": {"items": [{"id": matches[query]}]}}
+
+        sp.search.side_effect = search
         auth_manager = Mock()
         auth_manager.is_token_expired.return_value = False
 
@@ -105,9 +111,9 @@ class TestMain(unittest.TestCase):
             sp.user_playlist_add_tracks.assert_called_once_with(
                 "alice",
                 "playlist123",
-                ["track123"],
+                ["title-only-track", "complete-track"],
             )
-            self.assertEqual(sp.search.call_count, 2)
+            self.assertEqual(sp.search.call_count, 3)
 
             with open(failed_matches_filename, encoding="utf-8") as failed_matches_file:
                 self.assertEqual(failed_matches_file.read(), "")

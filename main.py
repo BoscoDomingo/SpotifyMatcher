@@ -99,11 +99,14 @@ def get_title_and_artist(music_dir):
             except Exception:
                 continue
 
-            if not audiofile.title or not audiofile.artist:
+            if not audiofile.title:
                 continue
 
             files_read += 1
-            yield f"track:{audiofile.title} artist:{audiofile.artist}", f"{audiofile.artist} - {audiofile.title}"
+            if audiofile.artist:
+                yield f"track:{audiofile.title} artist:{audiofile.artist}", f"{audiofile.artist} - {audiofile.title}"
+            else:
+                yield f"track:{audiofile.title}", audiofile.title
 
     if files_read == 0:
         print("\nNo files found at the specified location.Please check the path to the directory is correct.")
