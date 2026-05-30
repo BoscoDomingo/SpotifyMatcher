@@ -83,6 +83,9 @@ def get_title_and_artist(music_dir):
             except Exception:
                 continue
 
+            if not audiofile.title or not audiofile.artist:
+                continue
+
             files_read += 1
             yield f"track:{audiofile.title} artist:{audiofile.artist}", f"{audiofile.artist} - {audiofile.title}"
 

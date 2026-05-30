@@ -2,6 +2,7 @@ import unittest
 from contextlib import redirect_stdout
 from io import StringIO
 from tempfile import TemporaryDirectory
+from types import SimpleNamespace
 from unittest.mock import Mock, patch
 
 import main
@@ -64,6 +65,47 @@ class TestMain(unittest.TestCase):
                 "alice",
                 "playlist123",
                 ["track123", "track123"],
+            )
+            self.assertEqual(sp.search.call_count, 2)
+
+            with open(failed_matches_filename, encoding="utf-8") as failed_matches_file:
+                self.assertEqual(failed_matches_file.read(), "")
+
+    def test_run_skips_spotify_searches_for_incomplete_tags(self):
+        sp = Mock()
+        sp.search.side_effect = [
+            {"tracks": {"items": [{"id": "warmup"}]}},
+            {"tracks": {"items": [{"id": "track123"}]}},
+        ]
+        auth_manager = Mock()
+        auth_manager.is_token_expired.return_value = False
+
+        with TemporaryDirectory() as tmpdir:
+            failed_matches_filename = f"{tmpdir}/failed.txt"
+            for filename in ("missing-title.mp3", "missing-artist.mp3", "complete.mp3"):
+                open(f"{tmpdir}/{filename}", "w", encoding="utf-8").close()
+
+            with (
+                patch("main.get_user_data", return_value=("alice", "playlist123")),
+                patch("main.connect_to_spotify", return_value=(sp, auth_manager)),
+                patch("main.get_auth_token", return_value={"refresh_token": "refresh"}),
+                patch("main.TinyTag.get") as get_tags,
+                patch("main.ensure_playlist_exists", return_value="playlist123"),
+                patch("main.FAILED_MATCHES_FILENAME", failed_matches_filename),
+            ):
+                get_tags.side_effect = [
+                    SimpleNamespace(title=None, artist="Artist"),
+                    SimpleNamespace(title="Song", artist=None),
+                    SimpleNamespace(title="Song", artist="Artist"),
+                ]
+
+                with redirect_stdout(StringIO()):
+                    main.run(tmpdir)
+
+            sp.user_playlist_add_tracks.assert_called_once_with(
+                "alice",
+                "playlist123",
+                ["track123"],
             )
             self.assertEqual(sp.search.call_count, 2)
 
