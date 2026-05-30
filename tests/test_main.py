@@ -1,5 +1,8 @@
 import unittest
-from unittest.mock import Mock
+from contextlib import redirect_stdout
+from io import StringIO
+from tempfile import TemporaryDirectory
+from unittest.mock import Mock, patch
 
 import main
 
@@ -27,6 +30,45 @@ class TestMain(unittest.TestCase):
 
         self.assertEqual(sp.user_playlist_add_tracks.call_count, 3)
         self.assertEqual(track_ids, [])
+
+    def test_run_reuses_spotify_searches_for_duplicate_songs(self):
+        sp = Mock()
+        sp.search.side_effect = [
+            {"tracks": {"items": [{"id": "warmup"}]}},
+            {"tracks": {"items": [{"id": "track123"}]}},
+        ]
+        auth_manager = Mock()
+        auth_manager.is_token_expired.return_value = False
+
+        with TemporaryDirectory() as tmpdir:
+            failed_matches_filename = f"{tmpdir}/failed.txt"
+
+            with (
+                patch("main.get_user_data", return_value=("alice", "playlist123")),
+                patch("main.connect_to_spotify", return_value=(sp, auth_manager)),
+                patch("main.get_auth_token", return_value={"refresh_token": "refresh"}),
+                patch(
+                    "main.get_title_and_artist",
+                    return_value=[
+                        ("track:Song artist:Artist", "Artist - Song"),
+                        ("track:Song artist:Artist", "Artist - Song"),
+                    ],
+                ),
+                patch("main.ensure_playlist_exists", return_value="playlist123"),
+                patch("main.FAILED_MATCHES_FILENAME", failed_matches_filename),
+            ):
+                with redirect_stdout(StringIO()):
+                    main.run()
+
+            sp.user_playlist_add_tracks.assert_called_once_with(
+                "alice",
+                "playlist123",
+                ["track123", "track123"],
+            )
+            self.assertEqual(sp.search.call_count, 2)
+
+            with open(failed_matches_filename, encoding="utf-8") as failed_matches_file:
+                self.assertEqual(failed_matches_file.read(), "")
 
 
 if __name__ == "__main__":

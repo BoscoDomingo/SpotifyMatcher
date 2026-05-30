@@ -161,6 +161,7 @@ def run(music_dir=MUSIC_DIR):
 
     token_info = get_auth_token(auth_manager)
     track_ids = []
+    search_cache = {}
     searched_songs = 0
 
     with open(FAILED_MATCHES_FILENAME, "w", encoding="utf-8") as failed_matches_file:
@@ -171,9 +172,14 @@ def run(music_dir=MUSIC_DIR):
             searched_songs += 1
             print(f"{searched_songs}: {display_name}")
 
-            try:
-                result = sp.search(query, limit=1)["tracks"]["items"][0]["id"]
-            except Exception:
+            if query not in search_cache:
+                try:
+                    search_cache[query] = sp.search(query, limit=1)["tracks"]["items"][0]["id"]
+                except Exception:
+                    search_cache[query] = None
+
+            result = search_cache[query]
+            if result is None:
                 print("\t*NO MATCH*")
                 failed_matches_file.write(f"{display_name}\n")
             else:
