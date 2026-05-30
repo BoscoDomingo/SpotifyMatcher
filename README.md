@@ -26,7 +26,7 @@ On to the requirements and instructions:
 
 Make sure you have Python 3.10+ installed, preferably the latest version (I tested it with Python 3.12.4 on an x64 PC with Windows 11).
 
-You'll need to install the libraries `spotipy`, `tinytag` and `eyed3`.
+You'll need to install SpotifyMatcher's Python dependencies.
 
 I suggest you create a virtual environment so you don't install them globally, with the built-in `venv` or via `virtualenv`.
 
@@ -52,16 +52,10 @@ To exit the virtual environment, simply type `deactivate` and press Enter. It is
 
 #### Installing the libraries
 
-You can now install `spotipy`, `tinytag` and `eyed3` inside the venv with:
+You can now install SpotifyMatcher and its dependencies inside the venv with:
 
 ```shell
-pip install -r requirements.txt
-```
-
-or
-
-```shell
-pip install -U spotipy tinytag eyed3
+python -m pip install -e .
 ```
 
 ### Creating a Spotify Developer Application

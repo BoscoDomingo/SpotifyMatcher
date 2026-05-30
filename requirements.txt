@@ -1,2 +1,0 @@
-spotipy~=2.26.0
-tinytag~=2.2.1
