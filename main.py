@@ -10,6 +10,19 @@ from tinytag import TinyTag
 SCOPE = "playlist-modify-public playlist-modify-private user-library-modify"
 MUSIC_DIR = ""
 FAILED_MATCHES_FILENAME = "Failed matches - SpotifyMatcher.txt"
+AUDIO_FILE_EXTENSIONS = {
+    ".aac",
+    ".aif",
+    ".aiff",
+    ".flac",
+    ".m4a",
+    ".mp3",
+    ".mp4",
+    ".ogg",
+    ".opus",
+    ".wav",
+    ".wma",
+}
 # Write the dirpath directly here to avoid having to do it through terminal.
 # Make sure to escape backslashes. Examples:
 # 'C:/Users/John/Music/My Music'
@@ -78,6 +91,9 @@ def get_title_and_artist(music_dir):
     files_read = 0
     for subdir, _, files in os.walk(music_dir):
         for file in files:
+            if os.path.splitext(file)[1].lower() not in AUDIO_FILE_EXTENSIONS:
+                continue
+
             try:
                 audiofile = TinyTag.get(os.path.join(subdir, file))
             except Exception:
