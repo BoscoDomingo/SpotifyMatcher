@@ -1,16 +1,19 @@
+from __future__ import annotations
+
 import os
 import sys
 from datetime import datetime
 from time import sleep
+from typing import Any, Iterator, Sequence
 
 import spotipy
 from spotipy import oauth2
 from tinytag import TinyTag
 
-SCOPE = "playlist-modify-public playlist-modify-private user-library-modify"
-MUSIC_DIR = ""
-FAILED_MATCHES_FILENAME = "Failed matches - SpotifyMatcher.txt"
-AUDIO_FILE_EXTENSIONS = {
+SCOPE: str = "playlist-modify-public playlist-modify-private user-library-modify"
+MUSIC_DIR: str = ""
+FAILED_MATCHES_FILENAME: str = "Failed matches - SpotifyMatcher.txt"
+AUDIO_FILE_EXTENSIONS: set[str] = {
     ".aac",
     ".aif",
     ".aiff",
@@ -29,7 +32,7 @@ AUDIO_FILE_EXTENSIONS = {
 # "C:\\Users\\John\\Music\\My Music"
 
 
-def get_user_data(argv=None):
+def get_user_data(argv: Sequence[str] | None = None) -> tuple[str, str]:
     """Retrieve username and optional playlist id from arguments."""
     args = argv if argv is not None else sys.argv
     if len(args) == 2:
@@ -45,7 +48,7 @@ def get_user_data(argv=None):
     sys.exit()
 
 
-def connect_to_spotify(username):
+def connect_to_spotify(username: str) -> tuple[spotipy.Spotify, oauth2.SpotifyOAuth]:
     """Create and return the Spotify client and auth manager for a user."""
     auth_manager = oauth2.SpotifyOAuth(
         client_id="1b906312d4eb44189b1762bba74fa4f6",
@@ -62,7 +65,7 @@ def connect_to_spotify(username):
     return spotipy.Spotify(auth_manager=auth_manager), auth_manager
 
 
-def get_auth_token(auth_manager):
+def get_auth_token(auth_manager: oauth2.SpotifyOAuth) -> dict[str, Any]:
     auth_token = auth_manager.get_cached_token()
 
     if not auth_token:
@@ -71,7 +74,7 @@ def get_auth_token(auth_manager):
     return auth_token
 
 
-def get_title_and_artist(music_dir):
+def get_title_and_artist(music_dir: str) -> Iterator[tuple[str, str]]:
     """Read files in music_dir and yield (spotify_query, display_name)."""
     if len(music_dir) == 0 or not os.path.isdir(music_dir):
         while True:
@@ -120,7 +123,7 @@ def get_title_and_artist(music_dir):
     )
 
 
-def ensure_playlist_exists(sp, username, playlist_id):
+def ensure_playlist_exists(sp: spotipy.Spotify, username: str, playlist_id: str) -> str:
     try:
         if not playlist_id:
             raise ValueError("No playlist ID provided")
@@ -136,7 +139,7 @@ def ensure_playlist_exists(sp, username, playlist_id):
         return create_new_playlist(sp, username)
 
 
-def create_new_playlist(sp, username):
+def create_new_playlist(sp: spotipy.Spotify, username: str) -> str:
     try:
         date = datetime.now().strftime("%d %b %Y at %H:%M")
         playlist_id = sp.user_playlist_create(
@@ -157,7 +160,12 @@ def create_new_playlist(sp, username):
         sys.exit(1)
 
 
-def add_tracks_to_playlist(sp, username, playlist_id, track_ids):
+def add_tracks_to_playlist(
+    sp: spotipy.Spotify,
+    username: str,
+    playlist_id: str,
+    track_ids: list[str],
+) -> None:
     """Add tracks in batches of 100, since that's Spotify's limit."""
     spotify_limit = 100
     while len(track_ids) > 0:
@@ -169,13 +177,13 @@ def add_tracks_to_playlist(sp, username, playlist_id, track_ids):
             del track_ids[:spotify_limit]
 
 
-def calculate_success_rate(matches, searched):
+def calculate_success_rate(matches: int, searched: int) -> str:
     if searched == 0:
         return "0.00"
     return "{:.2f}".format(matches / searched * 100)
 
 
-def run(music_dir=MUSIC_DIR):
+def run(music_dir: str = MUSIC_DIR) -> None:
     username, playlist_id = get_user_data()
     sp, auth_manager = connect_to_spotify(username)
 

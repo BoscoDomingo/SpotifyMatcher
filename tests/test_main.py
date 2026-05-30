@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import unittest
 from contextlib import redirect_stdout
 from io import StringIO
@@ -9,21 +11,21 @@ import main
 
 
 class TestMain(unittest.TestCase):
-    def test_get_user_data_with_username_only(self):
+    def test_get_user_data_with_username_only(self) -> None:
         username, playlist_id = main.get_user_data(["main.py", "alice"])
         self.assertEqual(username, "alice")
         self.assertEqual(playlist_id, "")
 
-    def test_get_user_data_with_playlist(self):
+    def test_get_user_data_with_playlist(self) -> None:
         username, playlist_id = main.get_user_data(["main.py", "alice", "playlist123"])
         self.assertEqual(username, "alice")
         self.assertEqual(playlist_id, "playlist123")
 
-    def test_calculate_success_rate(self):
+    def test_calculate_success_rate(self) -> None:
         self.assertEqual(main.calculate_success_rate(25, 40), "62.50")
         self.assertEqual(main.calculate_success_rate(0, 0), "0.00")
 
-    def test_add_tracks_to_playlist_batches(self):
+    def test_add_tracks_to_playlist_batches(self) -> None:
         sp = Mock()
         track_ids = [f"id{i}" for i in range(205)]
 
@@ -32,7 +34,7 @@ class TestMain(unittest.TestCase):
         self.assertEqual(sp.user_playlist_add_tracks.call_count, 3)
         self.assertEqual(track_ids, [])
 
-    def test_run_reuses_spotify_searches_for_duplicate_songs(self):
+    def test_run_reuses_spotify_searches_for_duplicate_songs(self) -> None:
         sp = Mock()
         sp.search.side_effect = [
             {"tracks": {"items": [{"id": "warmup"}]}},
@@ -71,10 +73,10 @@ class TestMain(unittest.TestCase):
             with open(failed_matches_filename, encoding="utf-8") as failed_matches_file:
                 self.assertEqual(failed_matches_file.read(), "")
 
-    def test_run_skips_spotify_searches_only_when_title_is_missing(self):
+    def test_run_skips_spotify_searches_only_when_title_is_missing(self) -> None:
         sp = Mock()
 
-        def search(query, limit):
+        def search(query: str, limit: int) -> dict[str, dict[str, list[dict[str, str]]]]:
             matches = {
                 "whatever": "warmup",
                 "track:Song": "title-only-track",
@@ -118,7 +120,7 @@ class TestMain(unittest.TestCase):
             with open(failed_matches_filename, encoding="utf-8") as failed_matches_file:
                 self.assertEqual(failed_matches_file.read(), "")
 
-    def test_run_skips_non_audio_files_before_reading_tags(self):
+    def test_run_skips_non_audio_files_before_reading_tags(self) -> None:
         sp = Mock()
         sp.search.side_effect = [
             {"tracks": {"items": [{"id": "warmup"}]}},
