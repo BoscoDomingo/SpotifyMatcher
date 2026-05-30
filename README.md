@@ -2,47 +2,53 @@
 
 ![Logo image](https://user-images.githubusercontent.com/46006784/166269127-56d4709d-6464-4f83-aace-e6fb53bbbd9d.png)
 
-Cross-platform tool to match your local files to Spotify's database. Easily transfer all your local songs over to a playlist on Spotify in just a few minutes. Migrating your local library has never been easier!
+Free, cross-platform tool to match your local files to Spotify's database. Easily transfer all your local songs over to a playlist on Spotify in just a few minutes. Migrating your local library has never been easier!
+
+*Because we all deserve to listen to our music wherever we want to.*
+
+## Table of Contents <!-- omit in toc -->
 
 1. [Before you start (5 minutes)](#before-you-start-5-minutes)
-	1. [Install Python \>=3.10](#install-python-310)
-	2. [Using `venv` or `virtualenv` (OPTIONAL, RECOMMENDED)](#using-venv-or-virtualenv-optional-recommended)
-		1. [Installing the libraries](#installing-the-libraries)
-	3. [Creating a Spotify Developer Application](#creating-a-spotify-developer-application)
-	4. [Configuring your Spotify credentials](#configuring-your-spotify-credentials)
+   1. [Install Python >=3.10 and dependencies](#install-python-310-and-dependencies)
+      1. [Using `venv` or `virtualenv` (OPTIONAL, RECOMMENDED)](#using-venv-or-virtualenv-optional-recommended)
+      2. [Installing the libraries](#installing-the-libraries)
+   2. [Creating a Spotify Developer Application](#creating-a-spotify-developer-application)
+   3. [Configuring your Spotify credentials](#configuring-your-spotify-credentials)
 2. [Using SpotifyMatcher](#using-spotifymatcher)
-		1. [**_CAREFUL_**](#careful)
+   1. [**_CAREFUL_**](#careful)
 3. [Getting your username and playlist ids](#getting-your-username-and-playlist-ids)
-	1. [Username](#username)
-	2. [Playlist id](#playlist-id)
-
+   1. [Username](#username)
+   2. [Playlist id](#playlist-id)
 
 ## Before you start (5 minutes)
 
 > [!NOTE]
-> _This isn't infalible, and it would be quite surprising if it matched 100% of songs. Be aware you'll probably have to do **a bit** of manual searching, but this will significantly reduce that amount by automating the majority of the process._
+> _This tool isn't infalible, and it would be quite surprising if it matched 100% of songs. Be aware you'll probably have to do **a bit** of manual searching, but this will significantly reduce that amount by automating the majority of the process._
+>
+> Also, **this guide assumes no prior experience with code, Python or command line**. This means if you do have experience, feel free to skip around.
 
 ### Install Python >=3.10 and dependencies
 
-Make sure you have Python 3.10+ installed, preferably the latest version.
+Make sure you have Python 3.10+ installed, preferably the latest version. Google it or ask AI, as it will vary depending on your system.
 
 #### Using `venv` or `virtualenv` (OPTIONAL, RECOMMENDED)
 
 I suggest you create a virtual environment so you don't install dependencies globally, with the built-in `venv` or via `virtualenv`.
 
-For this, simply navigate to or open a terminal in the folder that the code is in (tip: type `wt` in the Windows Explorer address bar for Windows Terminal, or `cmd` if that doesn't work) and write the following commands (make sure to change `.venv` for your desired folder name):
+For this, simply navigate to or open a terminal in the folder that the code is in (tip: type `wt` in the Windows Explorer address bar for Windows Terminal, or `cmd` if that doesn't work, or use `cd /path/to/folder`) and write the following:
 
 ```shell
 python -m pip install -U pip # get the latest pip just in case
 
 # Set up the virtual environment
-pip install virtualenv && python -m virtualenv .venv
-# python -m venv .venv # If you prefer the built-in venv
+python -m venv .venv
+# pip install virtualenv && python -m virtualenv .venv # if you prefer `virtualenv`, but `venv` works just fine
 
 # Then activate it according to your system:
-.venv\Scripts\activate.bat # cmd
-.venv\Scripts\Activate.ps1 # PowerShell
+chmod +x .venv/bin/activate # if you run into permission issues on Linux/MacOS
 source .venv/bin/activate # Linux/MacOS
+.venv\Scripts\Activate.ps1 # PowerShell
+.venv\Scripts\activate.bat # cmd
 ```
 
 This should make the terminal look something like this:
@@ -65,7 +71,7 @@ And you're all set!
 
 Head over to [the Spotify Developer website](https://developer.spotify.com/dashboard/), log in with your Spotify account and create a new application (name doesn't matter).
 
-Copy the `client id` and the `client secret`, open the settings and add `https://open.spotify.com/` to the "Redirect URIs".
+Copy the `client id` and the `client secret` (don't worry, the ones shown below no longer valid), open the settings and add `https://open.spotify.com/` to the "Redirect URIs".
 
 ![](https://i.imgur.com/lwFiRh9.png)
 ![](https://i.imgur.com/OerZP5c.jpg)
@@ -77,12 +83,6 @@ Copy `.env.example` to `.env`:
 
 ```shell
 cp .env.example .env
-```
-
-On Windows Command Prompt, use:
-
-```shell
-copy .env.example .env
 ```
 
 Then open `.env` and paste the `client id` and `client secret` from your Spotify Developer application:
@@ -110,9 +110,8 @@ Paste it in the terminal.
 
 With that, authentication should be done and you can move on to the _good stuff_. Simply paste the path to your music directory (Tip: right click the address bar on Windows Explorer, 'Copy address as text').
 
-> **You can also bypass this step** if you manually enter a path in the source code. Simply find the `music_dir` variable and paste it there before you execute the program:
->
->![Imgur](https://i.imgur.com/mZGFs6d.png)
+> [!TIP]
+> **You can also bypass this step** if you manually enter a path in the source code. Simply find the `MUSIC_DIR` constant and paste it there before you execute the program
 
 If the path is valid, the program should start identifying your files and subsequently searching Spotify for a match. This may take several minutes, depending on your processor, internet speed, number of files... Just be patient!
 

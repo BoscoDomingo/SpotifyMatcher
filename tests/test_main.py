@@ -118,7 +118,7 @@ class TestMain(unittest.TestCase):
 
         def search(query: str, limit: int) -> dict[str, dict[str, list[dict[str, str]]]]:
             matches = {
-                "whatever": "warmup",
+                "dummy search": "warmup",
                 "track:Song": "title-only-track",
                 "track:Song artist:Artist": "complete-track",
             }

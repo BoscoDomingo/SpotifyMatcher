@@ -13,7 +13,11 @@ from tinytag import TinyTag
 
 load_dotenv()
 
-SCOPE: str = "playlist-modify-public playlist-modify-private user-library-modify"
+# MARK: - Constants and Configurations
+# Write the dirpath directly here to avoid having to do it through terminal.
+# Make sure to escape backslashes. Examples:
+# 'C:/Users/John/Music/My Music'
+# "C:\\Users\\John\\Music\\My Music"MUSIC_DIR: str = ""
 MUSIC_DIR: str = ""
 FAILED_MATCHES_FILENAME: str = "Failed matches - SpotifyMatcher.txt"
 AUDIO_FILE_EXTENSIONS: set[str] = {
@@ -29,10 +33,9 @@ AUDIO_FILE_EXTENSIONS: set[str] = {
     ".wav",
     ".wma",
 }
-# Write the dirpath directly here to avoid having to do it through terminal.
-# Make sure to escape backslashes. Examples:
-# 'C:/Users/John/Music/My Music'
-# "C:\\Users\\John\\Music\\My Music"
+SCOPE: str = "playlist-modify-public playlist-modify-private user-library-modify"
+"""Spotify doesn't allow more than 100 tracks to be added to a playlist at once."""
+SPOTIFY_ADD_SONG_TO_PLAYLIST_LIMIT: int = 100
 
 
 def get_user_data(argv: Sequence[str] | None = None) -> tuple[str, str]:
@@ -120,12 +123,17 @@ def get_title_and_artist(music_dir: str) -> Iterator[tuple[str, str]]:
 
             files_read += 1
             if audiofile.artist:
-                yield f"track:{audiofile.title} artist:{audiofile.artist}", f"{audiofile.artist} - {audiofile.title}"
+                yield (
+                    f"track:{audiofile.title} artist:{audiofile.artist}",
+                    f"{audiofile.artist} - {audiofile.title}",
+                )
             else:
                 yield f"track:{audiofile.title}", audiofile.title
 
     if files_read == 0:
-        print("\nNo files found at the specified location.Please check the path to the directory is correct.")
+        print(
+            "\nNo files found at the specified location.Please check the path to the directory is correct."
+        )
         sys.exit()
 
     print(
@@ -137,6 +145,7 @@ def get_title_and_artist(music_dir: str) -> Iterator[tuple[str, str]]:
 
 
 def ensure_playlist_exists(sp: spotipy.Spotify, username: str, playlist_id: str) -> str:
+    """Check if the provided playlist ID exists and belongs to the user. If not, create a new playlist."""
     try:
         if not playlist_id:
             raise ValueError("No playlist ID provided")
@@ -180,14 +189,15 @@ def add_tracks_to_playlist(
     track_ids: list[str],
 ) -> None:
     """Add tracks in batches of 100, since that's Spotify's limit."""
-    spotify_limit = 100
     while len(track_ids) > 0:
         try:
-            sp.user_playlist_add_tracks(username, playlist_id, track_ids[:spotify_limit])
+            sp.user_playlist_add_tracks(
+                username, playlist_id, track_ids[:SPOTIFY_ADD_SONG_TO_PLAYLIST_LIMIT]
+            )
         except Exception:
             sleep(0.2)
         else:
-            del track_ids[:spotify_limit]
+            del track_ids[:SPOTIFY_ADD_SONG_TO_PLAYLIST_LIMIT]
 
 
 def calculate_success_rate(matches: int, searched: int) -> str:
@@ -200,7 +210,8 @@ def run(music_dir: str = MUSIC_DIR) -> None:
     username, playlist_id = get_user_data()
     sp, auth_manager = connect_to_spotify(username)
 
-    sp.search("whatever", limit=1)
+		# Required to initialize the token and avoid issues with expired tokens during the search loop
+    sp.search("dummy search", limit=1)
 
     token_info = get_auth_token(auth_manager)
     track_ids = []
@@ -210,14 +221,18 @@ def run(music_dir: str = MUSIC_DIR) -> None:
     with open(FAILED_MATCHES_FILENAME, "w", encoding="utf-8") as failed_matches_file:
         for query, display_name in get_title_and_artist(music_dir):
             if auth_manager.is_token_expired(token_info):
-                token_info = auth_manager.refresh_access_token(token_info["refresh_token"])
+                token_info = auth_manager.refresh_access_token(
+                    token_info["refresh_token"]
+                )
 
             searched_songs += 1
             print(f"{searched_songs}: {display_name}")
 
             if query not in search_cache:
                 try:
-                    search_cache[query] = sp.search(query, limit=1)["tracks"]["items"][0]["id"]
+                    search_cache[query] = sp.search(query, limit=1)["tracks"]["items"][
+                        0
+                    ]["id"]
                 except Exception:
                     search_cache[query] = None
 
@@ -229,13 +244,17 @@ def run(music_dir: str = MUSIC_DIR) -> None:
                 track_ids.append(result)
 
         success_rate = calculate_success_rate(len(track_ids), searched_songs)
-        print(f"\n***TOTAL SONGS SEARCHED: {searched_songs}  TOTAL MATCHES:{len(track_ids)} ({success_rate}%)***\n")
+        print(
+            f"\n***TOTAL SONGS SEARCHED: {searched_songs}  TOTAL MATCHES:{len(track_ids)} ({success_rate}%)***\n"
+        )
 
     playlist_id = ensure_playlist_exists(sp, username, playlist_id)
     number_of_matches = len(track_ids)
     add_tracks_to_playlist(sp, username, playlist_id, track_ids)
 
-    print(f"\nSuccessfully added {number_of_matches} songs to the playlist.\nThank you for using SpotifyMatcher!")
+    print(
+        f"\nSuccessfully added {number_of_matches} songs to the playlist.\nThank you for using SpotifyMatcher!"
+    )
     print(
         f"\n{searched_songs - number_of_matches} UNMATCHED SONGS (search "
         "for these manually, as they either have wrong info or aren't "
