@@ -7,8 +7,11 @@ from time import sleep
 from typing import Any, Iterator, Sequence
 
 import spotipy
+from dotenv import load_dotenv
 from spotipy import oauth2
 from tinytag import TinyTag
+
+load_dotenv()
 
 SCOPE: str = "playlist-modify-public playlist-modify-private user-library-modify"
 MUSIC_DIR: str = ""
@@ -50,9 +53,19 @@ def get_user_data(argv: Sequence[str] | None = None) -> tuple[str, str]:
 
 def connect_to_spotify(username: str) -> tuple[spotipy.Spotify, oauth2.SpotifyOAuth]:
     """Create and return the Spotify client and auth manager for a user."""
+    client_id = os.getenv("SPOTIFY_CLIENT_ID")
+    client_secret = os.getenv("SPOTIFY_CLIENT_SECRET")
+
+    if not client_id or not client_secret:
+        print(
+            "Missing Spotify credentials. Copy .env.example to .env and set "
+            "SPOTIFY_CLIENT_ID and SPOTIFY_CLIENT_SECRET."
+        )
+        sys.exit(1)
+
     auth_manager = oauth2.SpotifyOAuth(
-        client_id="1b906312d4eb44189b1762bba74fa4f6",
-        client_secret="adb0a2eaadd64949b3ea2074a2e69b6f",
+        client_id=client_id,
+        client_secret=client_secret,
         redirect_uri="https://open.spotify.com/",
         scope=SCOPE,
         username=username,

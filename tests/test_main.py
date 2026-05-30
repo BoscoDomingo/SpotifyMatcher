@@ -34,6 +34,46 @@ class TestMain(unittest.TestCase):
         self.assertEqual(sp.user_playlist_add_tracks.call_count, 3)
         self.assertEqual(track_ids, [])
 
+    def test_connect_to_spotify_uses_credentials_from_env(self) -> None:
+        with (
+            patch.dict(
+                "os.environ",
+                {
+                    "SPOTIFY_CLIENT_ID": "client-id",
+                    "SPOTIFY_CLIENT_SECRET": "client-secret",
+                },
+                clear=True,
+            ),
+            patch("main.oauth2.SpotifyOAuth") as spotify_oauth,
+            patch("main.spotipy.Spotify") as spotify,
+        ):
+            spotify_oauth.return_value = Mock()
+
+            main.connect_to_spotify("alice")
+
+        spotify_oauth.assert_called_once_with(
+            client_id="client-id",
+            client_secret="client-secret",
+            redirect_uri="https://open.spotify.com/",
+            scope=main.SCOPE,
+            username="alice",
+        )
+        spotify.assert_called_once_with(auth_manager=spotify_oauth.return_value)
+
+    def test_connect_to_spotify_exits_when_credentials_are_missing(self) -> None:
+        output = StringIO()
+
+        with (
+            patch.dict("os.environ", {}, clear=True),
+            patch("main.oauth2.SpotifyOAuth") as spotify_oauth,
+            redirect_stdout(output),
+            self.assertRaises(SystemExit),
+        ):
+            main.connect_to_spotify("alice")
+
+        spotify_oauth.assert_not_called()
+        self.assertIn("Missing Spotify credentials", output.getvalue())
+
     def test_run_reuses_spotify_searches_for_duplicate_songs(self) -> None:
         sp = Mock()
         sp.search.side_effect = [

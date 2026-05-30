@@ -9,6 +9,7 @@ Cross-platform tool to match your local files to Spotify's database. Easily tran
 	2. [Using `venv` or `virtualenv` (OPTIONAL, RECOMMENDED)](#using-venv-or-virtualenv-optional-recommended)
 		1. [Installing the libraries](#installing-the-libraries)
 	3. [Creating a Spotify Developer Application](#creating-a-spotify-developer-application)
+	4. [Configuring your Spotify credentials](#configuring-your-spotify-credentials)
 2. [Using SpotifyMatcher](#using-spotifymatcher)
 		1. [**_CAREFUL_**](#careful)
 3. [Getting your username and playlist ids](#getting-your-username-and-playlist-ids)
@@ -18,27 +19,27 @@ Cross-platform tool to match your local files to Spotify's database. Easily tran
 
 ## Before you start (5 minutes)
 
-_This isn't infalible, and it would be quite surprising if it matched 100% of songs. Be aware you'll probably have to do **a bit** of manual searching, but this will significantly reduce that amount by automating the majority of the process._
+> [!NOTE]
+> _This isn't infalible, and it would be quite surprising if it matched 100% of songs. Be aware you'll probably have to do **a bit** of manual searching, but this will significantly reduce that amount by automating the majority of the process._
 
-On to the requirements and instructions:
+### Install Python >=3.10 and dependencies
 
-### Install Python >=3.10
+Make sure you have Python 3.10+ installed, preferably the latest version.
 
-Make sure you have Python 3.10+ installed, preferably the latest version (I tested it with Python 3.12.4 on an x64 PC with Windows 11).
+#### Using `venv` or `virtualenv` (OPTIONAL, RECOMMENDED)
 
-You'll need to install SpotifyMatcher's Python dependencies.
+I suggest you create a virtual environment so you don't install dependencies globally, with the built-in `venv` or via `virtualenv`.
 
-I suggest you create a virtual environment so you don't install them globally, with the built-in `venv` or via `virtualenv`.
-
-### Using `venv` or `virtualenv` (OPTIONAL, RECOMMENDED)
-
-For this, simply navigate to or open a terminal in the folder that the code is in (type `wt` in the Windows Explorer address bar for Windows Terminal, or `cmd` if that doesn't work) and write the following commands (make sure to change `.venv` for your desired folder name):
+For this, simply navigate to or open a terminal in the folder that the code is in (tip: type `wt` in the Windows Explorer address bar for Windows Terminal, or `cmd` if that doesn't work) and write the following commands (make sure to change `.venv` for your desired folder name):
 
 ```shell
 python -m pip install -U pip # get the latest pip just in case
-pip install virtualenv
+
+# Set up the virtual environment
+pip install virtualenv && python -m virtualenv .venv
 # python -m venv .venv # If you prefer the built-in venv
-python -m virtualenv .venv
+
+# Then activate it according to your system:
 .venv\Scripts\activate.bat # cmd
 .venv\Scripts\Activate.ps1 # PowerShell
 source .venv/bin/activate # Linux/MacOS
@@ -52,29 +53,46 @@ To exit the virtual environment, simply type `deactivate` and press Enter. It is
 
 #### Installing the libraries
 
-You can now install SpotifyMatcher and its dependencies inside the venv with:
+You can now run:
 
 ```shell
 python -m pip install -e .
 ```
 
+And you're all set!
+
 ### Creating a Spotify Developer Application
 
 Head over to [the Spotify Developer website](https://developer.spotify.com/dashboard/), log in with your Spotify account and create a new application (name doesn't matter).
 
-Copy the `client id` and the `client secret`, open the settings and make sure to add a URL to the "Redirect URIs". It doesn't really matter what, try https://localhost/ if not sure, but take note of it because you'll need to write it in the source code later.
+Copy the `client id` and the `client secret`, open the settings and add `https://open.spotify.com/` to the "Redirect URIs".
 
 ![](https://i.imgur.com/lwFiRh9.png)
 ![](https://i.imgur.com/OerZP5c.jpg)
 ![](https://i.imgur.com/Z3DIPZf.jpg)
 
-With these 3, open the file `main.py` with whatever IDE or Text Editor you like (preferably Notepad++, Wordpad or TextEdit if you use a text editor), and change this bit of code:
+### Configuring your Spotify credentials
 
-![connect_to_spotify code](https://i.imgur.com/ltblD1T.png)
+Copy `.env.example` to `.env`:
 
-(Use the Find function to find it if you don't see it. It is inside the `connect_to_spotify` function)
+```shell
+cp .env.example .env
+```
 
-Paste the aforementioned ids and the URL you chose in the corresponding lines. With this, setup is done and you can now use the tool!
+On Windows Command Prompt, use:
+
+```shell
+copy .env.example .env
+```
+
+Then open `.env` and paste the `client id` and `client secret` from your Spotify Developer application:
+
+```dotenv
+SPOTIFY_CLIENT_ID=your-client-id
+SPOTIFY_CLIENT_SECRET=your-client-secret
+```
+
+With this, setup is done and you can now use the tool!
 
 ## Using SpotifyMatcher
 
